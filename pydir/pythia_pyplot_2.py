@@ -21,7 +21,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 pT_111 = []
-pT_112 = []
 pT_113 = []
 pT_114 = []
 event_types = []
@@ -42,8 +41,6 @@ for iEvent in range(0,10000):
 
     if a == 111:
         pT_111.append(b)
-    elif a == 112:
-        pT_112.append(b)
     elif a == 113:
         pT_113.append(b)
     elif a == 114:
@@ -51,29 +48,25 @@ for iEvent in range(0,10000):
 
 # Check for uncommon event types that will not appear on plot
 for a in event_types:
-    if a != 111 and a != 112 and a != 113 and a != 114:
+    if a != 111 and a != 113 and a != 114:
         print "Warning other events included: ",a
+ 
+# print pT_111
+# print pT_113
+# print pT_114
  
 # End of event loop. Statistics. Histogram. Done.
 pythia.stat();
 
-# set number of desired bins(b) and range(r)
-b=40
+h='step'
 r=(20,60)
+b=40
+l=True
 
-# create bins using np.histogram
-x,binEdges=np.histogram(pT_111,bins=b,range=r)
-w,binEdges=np.histogram(pT_112,bins=b,range=r)
-y,binEdges=np.histogram(pT_113,bins=b,range=r)
-z,binEdges=np.histogram(pT_114,bins=b,range=r)
-bincenters = 0.5*(binEdges[1:]+binEdges[:-1])
-
-
-plt.semilogy(bincenters,x,'o',label='gg->gg')
-plt.semilogy(bincenters,w,'*',label='gg->qq(bar)')
-plt.semilogy(bincenters,y,'^',label='qg->qg')
-plt.semilogy(bincenters,z,'s',label="qq(bar)'->qq(bar)'")
-
+plt.figure(1)
+plt.hist(pT_111,histtype=h,range=r,bins=b,log=l,label='gg->gg')
+plt.hist(pT_113,histtype=h,range=r,bins=b,log=l,label='qg->qg')
+plt.hist(pT_114,histtype=h,range=r,bins=b,log=l,label="qq(bar)'->qq(bar)'")
 plt.title("pT counts for hard processes")
 plt.xlabel("pT")
 plt.ylabel("counts")
