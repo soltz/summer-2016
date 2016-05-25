@@ -72,12 +72,30 @@ def main():
         if not pythia.next(): break
         print '   ', pythia.info.code(), pythia.info.name(), pythia.info.pTHat(), pythia.info.thetaHat()
 
+#   Analyze jet and match particles to pythia.event final particles
         slowJet.analyze(pythia.event)
         slowJet.list()
         print slowJet.sizeJet()
+        print '\nSlowJet Results: pT, y, phi:'
         for i in range(slowJet.sizeJet()):
             print i,slowJet.pT(i),slowJet.y(i),slowJet.phi(i)
-        print slowJet.constituents(0)
+#   Extract constituents and convert nested list for ease of manipulation
+        slowJetPrtList = [[] for i in range(slowJet.sizeJet())]
+        for i in range(slowJet.sizeJet()):
+            slowJetPrtList[i] = list(slowJet.constituents(i))
+#        print slowJetPrtList
+#   Loop over pythia event particles and map onto reconstructed jet number
+#   There may be more elegant ways to perform this mapping
+        print '\nParticle index, name, pT, eta, phi and slowJet association:'
+        for i in range(pythia.event.size()):
+            prt = pythia.event[i]
+            if prt.isFinal():
+                inJet = -1
+                for j in range(len(slowJetPrtList)):
+                    if i in slowJetPrtList[j]:
+                            inJet = j
+                if (inJet>=0):
+                    print i, prt.name(), prt.pT(), prt.eta(), prt.phi(), inJet
             
         query = raw_input("q to quit; <CR> to continue: ")
         if (query=='q'):
