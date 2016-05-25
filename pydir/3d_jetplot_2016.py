@@ -1,19 +1,8 @@
-# main01.py is a part of the PYTHIA event generator.
-# Copyright (C) 2016 Torbjorn Sjostrand.
+#
 # PYTHIA is licenced under the GNU GPL version 2, see COPYING for details.
 # Please respect the MCnet Guidelines, see GUIDELINES for details.
 #
-# To set the path to the Pythia 8 Python interface do either (in a shell prompt):
-#      export PYTHONPATH=$(PREFIX_LIB):$PYTHONPATH
-# or the following which sets the path from within Python.
-# import sys
-# cfg = open("Makefile.inc")
-# lib = "../lib"
-# for line in cfg:
-#     if line.startswith("PREFIX_LIB="): lib = line[11:-1]; break
-# sys.path.insert(0, lib)
 
-# Import the Pythia module.
 import pythia8
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -24,9 +13,9 @@ def usage():
     print '3d_jetplot_2016.py plots a 3d bar graph for p-p events created by pythia8.'
     print 'Usage: python 3d_jetplot_2016.py [options]'
     print '   -h, --help      : this message'
-    print '   -e, --eCM     = Center of Mass Energy per Nucleon (GeV) [200.0]'
-    print '   -p, --pTHatMin     = Minimum Transverse Momentum [20.0]'
-    print '   -s, --seed     = Initial Seed [-1]'
+    print '   -e, --eCM     = beam center-of-mass energy (GeV) [200.0]'
+    print '   -p, --pTHatMin     = minimum jet pT [20.0]'
+    print '   -s, --seed     = initial random number seed [-1]'
 
 def main():
 
@@ -38,8 +27,6 @@ def main():
         print str(err) # will print something like 'option -a not recognized'
         usage()
         sys.exit(2)
-
-#   Default values of eCM, pTHatMin, and seed
 
     eCM  = 200.0
     pTHatMin  = 20.0
@@ -57,7 +44,8 @@ def main():
             seed = int(a)
         else:
             assert False, 'unhandled option'
-        
+
+#   Initialize Pythia
     pythia = pythia8.Pythia()
     
     eCM = str(eCM)
@@ -78,19 +66,35 @@ def main():
 
     pythia.init()
 
+#   Initialize SlowJet
+    etaMax = 4.
+    radius = 0.7
+    pTjetMin = 10.
+    nSel = 2    
+    slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1);
+    
     while True:
 
         eta = []
         phi = []
         pT = []
         eT = []
+        jet_color = []
 
         if not pythia.next(): break
 
-        a = pythia.info.code()
-        event_type = pythia.info.name()
+        slowJet.analyze(pythia.event)
+        slowJet.list()
 
-        for prt in pythia.event:
+#   Extract constituents and convert nested list for ease of manipulation
+        slowJetPrtList = [[] for i in range(slowJet.sizeJet())]
+        for i in range(slowJet.sizeJet()):
+            slowJetPrtList[i] = list(slowJet.constituents(i))
+        print slowJetPrtList
+
+#   Loop over pythia event particles
+        for i in range(pythia.event.size()):
+            prt = pythia.event[i]
             if prt.isFinal():
                 prt_eta = prt.eta()
                 prt_phi = prt.phi()
@@ -102,22 +106,29 @@ def main():
                 pT.append(prt_pT)
                 eT.append(prt_eT)
 
+#   Final particles that are part of a jet will be colored red
+                for j in range(len(slowJetPrtList)):
+                    if i in slowJetPrtList[j]:
+                        jet_color.append('r')
+                if len(jet_color) < len(eta):
+                    jet_color.append('b')    
+                        
         base = np.zeros(len(eT))
-         # Set size of bars in plot
+#   Set size of bars in plot
         d_eta = 0.1
         d_phi = 0.1
-
-        # End of event loop. Statistics. Histogram. Done.
+#   End of event loop. Statistics. Histogram. Done.
         pythia.stat();
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
-        ax.bar3d(eta,phi,base,d_eta,d_phi,eT)
+        ax.bar3d(eta,phi,base,d_eta,d_phi,eT,color = jet_color)
 
         ax.set_xlabel('$\eta$')
         ax.set_ylabel('$\phi$')
         ax.set_zlabel('eT(GeV)')
 
+        event_type = pythia.info.name()
         title = 'hard process: ' + event_type
         plt.title(title)
         plt.show(block=False)
