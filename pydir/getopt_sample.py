@@ -13,7 +13,7 @@ def main():
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'ha:b:c:', \
-              ['help','opt_a','opt_b=','opt_c='])
+              ['help','opt_a=','opt_b=','opt_c='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
