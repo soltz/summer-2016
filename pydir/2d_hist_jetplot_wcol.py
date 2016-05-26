@@ -180,11 +180,10 @@ def main():
         ax.set_zlabel('eT(GeV)')
 
         event_type = pythia.info.name()
-        title = 'hard process: ' + event_type
+        title = 'hard process: %s (pTHat = %.2f)' % (event_type, pythia.info.pTHat())
         plt.title(title)
         pi = np.pi
         plt.ylim(-pi,pi)
-        plt.show(block=False)
         
         pythia.settings.listChanged()
         pythia.settings.list("Random:seed")
@@ -192,7 +191,8 @@ def main():
         for i in range(slowJet.sizeJet()):
             pT_jet = slowJet.pT(i)
             pT_label = 'slowJet pT = %.2f' % pT_jet
-            ax.text(slowJet.y(i),slowJet.phi(i),max(h)+1,pT_label)
+            ax.text(slowJet.y(i),slowJet.phi(i),max(h)+1,pT_label,horizontalalignment='center')
+        plt.show(block=False)
 
         query = raw_input("q to quit, p to save to pdf,  <CR> to continue: ")
         if (query=='q'):
