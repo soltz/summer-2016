@@ -16,13 +16,15 @@ def usage():
     print '   -e, --eCM     = beam center-of-mass energy (GeV) [200.0]'
     print '   -p, --pTHatMin     = minimum jet pT [20.0]'
     print '   -s, --seed     = initial random number seed [-1]'
+    print '   -c, --QCD     = hard QCD processes on/off [on]'
+    print '   -q, --QED     = hard QED processes on/off [off]'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'he:p:s:', \
-              ['help','eCM=','pTHatMin=','seed='])
+        opts, args = getopt.getopt(sys.argv[1:], 'he:p:s:c:q:', \
+              ['help','eCM=','pTHatMin=','seed=','QCD=','QED='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -31,6 +33,8 @@ def main():
     eCM  = 200.0
     pTHatMin  = 20.0
     seed  = -1
+    QCD = 'on'
+    QED = 'off'
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -42,6 +46,10 @@ def main():
             pTHatMin = float(a)
         elif o in ('-s', '--seed'):
             seed = int(a)
+        elif o in ('-c', '--QCD'):
+            QCD = str(a)
+        elif o in ('-q', '--QED'):
+            QED = str(a)
         else:
             assert False, 'unhandled option'
 
@@ -51,8 +59,12 @@ def main():
     eCM = str(eCM)
     set_eCM = "Beams:eCM = " + eCM
     pythia.readString(set_eCM)
-    
-    pythia.readString("HardQCD:all = on")
+
+    set_QCD = "HardQCD:all = " + QCD
+    pythia.readString(set_QCD)
+
+    set_QED = "PromptPhoton:all = " + QED
+    pythia.readString(set_QED)
 
     pTHatMin = str(pTHatMin)
     set_pTHatMin = "PhaseSpace:pTHatMin = " + pTHatMin
@@ -120,7 +132,7 @@ def main():
 #   Create bins using np.histogram2d(), the number of bins produced is the square of the value "b"
         b = 20
         tot_bins = b**2
-        bg_h, xedges, yedges = np.histogram2d(bg_eta,bg_phi,bins=b,weights=bg_eT)
+        bg_h, xedges, yedges = np.histogram2d(bg_eta,bg_phi,bins=b,range=[[-6,6], [-(np.pi), np.pi]],weights=bg_eT)
         bg_h = np.concatenate(bg_h)
         xcenters = 0.5*(xedges[1:]+xedges[:-1])
         xcenters = np.repeat(xcenters,b)
@@ -194,12 +206,12 @@ def main():
             ax.text(slowJet.y(i),slowJet.phi(i),max(h)+1,pT_label,horizontalalignment='center')
         plt.show(block=False)
 
-        query = raw_input("q to quit, p to save to pdf,  <CR> to continue: ")
+        query = raw_input("q to quit, p to save to png,  <CR> to continue: ")
         if (query=='q'):
             break
         if (query=='p'):
-            query = raw_input("name this pdf file (do not include extension .pdf): ")
-            filename = query + '.pdf'
+            query = raw_input("name this png file (do not include extension .png): ")
+            filename = query + '.png'
             plt.savefig(filename)
             query = raw_input("q to quit, <CR> to continue: ")
             if (query=='q'):
