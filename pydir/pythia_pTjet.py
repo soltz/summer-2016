@@ -62,17 +62,20 @@ b=40
 r=(20,60)
 
 # create bins using np.histogram
-x,binEdges=np.histogram(pT_111,bins=b,range=r)
-w,binEdges=np.histogram(pT_112,bins=b,range=r)
+w,binEdges=np.histogram(pT_111,bins=b,range=r)
+wbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+x,binEdges=np.histogram(pT_112,bins=b,range=r)
+xbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
 y,binEdges=np.histogram(pT_113,bins=b,range=r)
+ybincenters = 0.5*(binEdges[1:]+binEdges[:-1])
 z,binEdges=np.histogram(pT_114,bins=b,range=r)
-bincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+zbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
 
 
-plt.semilogy(bincenters,x,'o',label='gg->gg')
-plt.semilogy(bincenters,w,'*',label='gg->qq(bar)')
-plt.semilogy(bincenters,y,'^',label='qg->qg')
-plt.semilogy(bincenters,z,'s',label="qq(bar)'->qq(bar)'")
+plt.semilogy(wbincenters,w,'o',label='gg->gg')
+plt.semilogy(xbincenters,x,'*',label='gg->qq(bar)')
+plt.semilogy(ybincenters,y,'^',label='qg->qg')
+plt.semilogy(zbincenters,z,'s',label="qq(bar)'->qq(bar)'")
 
 plt.title("pT counts for hard processes")
 plt.xlabel("pT")
