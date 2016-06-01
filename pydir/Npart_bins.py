@@ -19,22 +19,29 @@ p = np.arange(0,1.05,0.05)
 quan = mquantiles(Npart, prob = p)
 
 counts, binedges = np.histogram(Npart, bins = quan)
-bincenters_1 = 0.5 * (binedges[1:] + binedges[:-1])
-
 mult_2, binedges = np.histogram(Npart, bins=quan, weights = mult)
-bincenters_2 = 0.5 * (binedges[1:] + binedges[:-1])
 
+#   create weighted bin centers
+weighted = []
+for i in range(len(binedges) - 1):
+    if i == len(binedges) -2 :
+        weighted.append(Npart[(Npart >= binedges[i]) & (Npart <= binedges[i+1])])
+    else:
+        weighted.append(Npart[(Npart >= binedges[i]) & (Npart < binedges[i+1])])
+for i in range(len(weighted)):
+    if i == 0:
+        weighted[i] = 2
+    else:
+        weighted[i] = np.mean(weighted[i])
 
 plt.figure(1)
-
-plt.subplot(211)
-plt.plot(bincenters_1, counts, 'o')
+plt.plot(weighted, counts, 'o')
 plt.title('bins')
 plt.xlabel('Npart')
 plt.ylabel('counts')
 
-plt.subplot(212)
-plt.plot(bincenters_2, mult_2, 'o')
+plt.figure(2)
+plt.plot(weighted, mult_2, 'o')
 plt.title('mult vs. Npart')
 plt.xlabel('Npart')
 plt.ylabel('mult')
