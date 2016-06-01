@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats.mstats import mquantiles
 
-data = np.loadtxt('auau_10k.txt')
+data = np.loadtxt('AuAu_200GeV_100k.txt')
 #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
 
 #   separate data into its separate parts
@@ -11,7 +11,7 @@ Npart = data[:,2]
 mult = data[:,3]
 
 #   scale mult
-mult = mult/100.0
+mult = mult/1000
 mult = mult/(Npart*0.5)
 
 p = np.arange(0,1.05,0.05)
@@ -32,6 +32,10 @@ for i in range(len(weighted)):
     else:
         weighted[i] = np.mean(weighted[i])
 
+#   remove first data points from trento data
+weighted = weighted[6:]
+mult_2 = mult_2[6:]
+        
 #   phenix data
 #   200 GeV Au Au
 Npart = np.array([350.9, 297.9, 251.0, 211.0, 176.3, 146.8, 120.9, 98.3, 78.7, 61.9, 47.6, 35.6])
