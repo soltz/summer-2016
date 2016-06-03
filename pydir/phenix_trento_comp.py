@@ -4,107 +4,132 @@ import matplotlib.pyplot as plt
 from scipy.stats.mstats import mquantiles
 from scipy.interpolate import interp1d
 from scipy.optimize import leastsq
+import getopt, sys
 
+def usage():
+    print 'Fits and compares trento data with Phenix experimental data.'
+    print 'Usage: python phenix_trento_comp.py [options]'
+    print '   -h, --help      : this message'
+    print '   -f, --filename     = file with trento data [AuAu_200GeV_100k.txt]'
+    print '   -e, --events     = number of trento events contained in file [100000]'
 
-def bin_data(trento_file, tot_events):
-    #   import data for trento events
-    data = np.loadtxt(trento_file)
-    #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
+def main():
 
-    #   separate data into its separate parts
-    Npart = data[:,2]
-    mult = data[:,3]
+#   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'hf:e:', \
+              ['help','filename=','events='])
+    except getopt.GetoptError, err:
+        print str(err) # will print something like 'option -a not recognized'
+        usage()
+        sys.exit(2)
 
-    #   scale mult
-    mult = mult/tot_events
-    mult = mult/(Npart*0.5)
+    filename  = 'AuAu_200GeV_100k.txt'
+    events = 100000
 
-    p = np.arange(0,1.05,0.05)
-    quan = mquantiles(Npart, prob = p)
-
-    binned_mult, binedges = np.histogram(Npart, bins=quan, weights = mult)
-
-    #   create weighted bin centers
-    weighted_bins = []
-    for i in range(len(binedges) - 1):
-        if i == len(binedges) -2 :
-            weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart <= binedges[i+1])])
+    for o, a in opts:
+        if o in ('-h', '--help'):
+            usage()
+            sys.exit()
+        elif o in ('-f', '--filename'):
+            filename = str(a)
+        elif o in ('-e', '--events'):
+            events = float(a)
         else:
-            weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart < binedges[i+1])])
-    for i in range(len(weighted_bins)):
-        if i == 0:
-            weighted_bins[i] = 2
-        else:
-            weighted_bins[i] = np.mean(weighted_bins[i])
+            assert False, 'unhandled option'
 
-    #   remove first data points from trento data
-    weighted_bins = weighted_bins[8:len(weighted_bins)-1]
-    binned_mult = binned_mult[8:len(binned_mult)-1]
+    def bin_data(trento_file, tot_events):
+        #   import data for trento events
+        data = np.loadtxt(trento_file)
+        #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
 
-    return [weighted_bins, binned_mult]
+        #   separate data into its separate parts
+        Npart = data[:,2]
+        mult = data[:,3]
 
-#weighted_10k, mult2_10k = bin_data('auau_10k.txt', 10000)
-weighted_100k, mult2_100k = bin_data('AuAu_200GeV_100k.txt', 100000)
-#weighted_1M, mult2_1M = bin_data('AuAu_200GeV_1M.txt', 1000000)
+        #   scale mult
+        mult = mult/tot_events
+        mult = mult/(Npart*0.5)
+
+        p = np.arange(0,1.05,0.05)
+        quan = mquantiles(Npart, prob = p)
+
+        binned_mult, binedges = np.histogram(Npart, bins=quan, weights = mult)
+
+        #   compile values in each bin
+        weighted_bins = []
+        for i in range(len(binedges) - 1):
+            if i == len(binedges) -2 :
+                weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart <= binedges[i+1])])
+            else:
+                weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart < binedges[i+1])])
+            
+        #   record bin error
+        bin_err = []
+        for i in range(len(weighted_bins)):
+            count = len(weighted_bins[i])
+            bin_err.append((count)**0.5)
+        bin_err = np.array(bin_err)
+        bin_err = bin_err/tot_events
+
+        #   average values in each bin
+        for i in range(len(weighted_bins)):
+            if i == 0:
+                weighted_bins[i] = 2
+            else:
+                weighted_bins[i] = np.mean(weighted_bins[i])
+
+        #   remove first data points from trento data
+        weighted_bins = weighted_bins[8:len(weighted_bins)-1]
+        binned_mult = binned_mult[8:len(binned_mult)-1]
+        bin_err = bin_err[8:len(bin_err)-1]
+
+        return [weighted_bins, binned_mult, bin_err]
+
+    weighted, mult2, bin_err = bin_data(filename, events)
+
+    #   phenix data
+    #   200 GeV Au Au
+    Npart = np.array([350.9, 297.9, 251.0, 211.0, 176.3, 146.8, 120.9, 98.3, 78.7, 61.9, 47.6, 35.6])
+    Npart = Npart[::-1]
+    Npart_err = np.array([4.7, 6.6, 7.3, 7.3, 7.0, 7.1, 7.0, 6.8, 6.1, 5.2, 4.9, 5.1])
+    Npart_err = Npart_err[::-1]
+    dNch = np.array([687.4, 560.4, 456.8, 371.5, 302.5, 245.6, 197.2, 156.4, 123.5, 95.3, 70.9, 52.2])
+    dNch = dNch[::-1]
+    dNch_err = np.array([36.6, 27.9, 22.3, 18.2, 15.8, 13.8, 12.2, 10.9, 9.6, 8.6, 7.6, 6.5])
+    dNch_err = dNch_err[::-1]
+    scaled_dNch = dNch/(Npart*0.5)
+    pub_err = np.array([0.22, 0.21, 0.21, 0.21, 0.22, 0.25, 0.28, 0.31, 0.34, 0.38, 0.44, 0.56])
+    pub_err = pub_err[::-1]
+
+    #   interpolation
+    inter_func = interp1d(Npart, scaled_dNch, kind = 'quadratic', bounds_error = False)
+    interp = inter_func(weighted)
 
 
-#   phenix data
-#   200 GeV Au Au
-Npart = np.array([350.9, 297.9, 251.0, 211.0, 176.3, 146.8, 120.9, 98.3, 78.7, 61.9, 47.6, 35.6])
-Npart = Npart[::-1]
-Npart_err = np.array([4.7, 6.6, 7.3, 7.3, 7.0, 7.1, 7.0, 6.8, 6.1, 5.2, 4.9, 5.1])
-Npart_err = Npart_err[::-1]
-dNch = np.array([687.4, 560.4, 456.8, 371.5, 302.5, 245.6, 197.2, 156.4, 123.5, 95.3, 70.9, 52.2])
-dNch = dNch[::-1]
-dNch_err = np.array([36.6, 27.9, 22.3, 18.2, 15.8, 13.8, 12.2, 10.9, 9.6, 8.6, 7.6, 6.5])
-dNch_err = dNch_err[::-1]
+    #   fit
+    def residuals(A, y1, y2):
+        err = y2 - (A * y1)
+        return err
+    def eval(x, A):
+        return A * x
+    A0 = np.array([100])
 
-scaled_dNch = dNch/(Npart*0.5)
-pub_err = np.array([0.22, 0.21, 0.21, 0.21, 0.22, 0.25, 0.28, 0.31, 0.34, 0.38, 0.44, 0.56])
-pub_err = pub_err[::-1]
+    A_fit, jac_val = leastsq(residuals, A0, args=(mult2, interp))
+    fit = eval(mult2, A_fit)
+    bin_err = eval(bin_err, A_fit)
+    print "fit parameter: ", A_fit
 
-#   interpolation
-inter_func = interp1d(Npart, scaled_dNch, kind = 'quadratic', bounds_error = False)
-#interp_10k = inter_func(weighted_10k)
-interp_100k = inter_func(weighted_100k)
-#interp_1M = inter_func(weighted_1M)
+    plt.figure(1)
 
-#   fit
-def residuals(A, y1, y2):
-    err = y2 - (A * y1)
-    return err
-def eval(x, A):
-    return A * x
-A0 = np.array([100])
+    plt.errorbar(weighted, fit, yerr = bin_err, fmt = '.', color = 'r', label = 'trento data')
+    plt.errorbar(Npart, scaled_dNch, yerr = pub_err, fmt = '.', color = 'b', label = 'phenix')
 
-#A_10k, jac_val = leastsq(residuals, A0, args=(mult2_10k, interp_10k))
-#fit_10k = eval(mult2_10k, A_10k)
+    plt.title('phenix data / trento comparison')
+    plt.ylabel("(dN$_{ch}$/d$\eta$)/(N$_{part}$/2)")
+    plt.xlabel("\nN$_{part}$")
+    plt.legend(loc=0)
 
-A_100k, jac_val = leastsq(residuals, A0, args=(mult2_100k, interp_100k))
-fit_100k = eval(mult2_100k, A_100k)
+    plt.show()
 
-#A_1M, jac_val = leastsq(residuals, A0, args=(mult2_1M, interp_1M))
-#fit_1M = eval(mult2_1M, A_1M)
-
-plt.figure(1)
-
-#plt.plot(weighted_10k, interp_10k, '^', color = 'b', label = 'interp_10k')
-#plt.plot(weighted_100k, interp_100k, '^', color = 'r', label = 'interp_100k')
-#plt.plot(weighted_1M, interp_1M, '^', color = 'g', label = 'interp_1M')
-
-#plt.plot(weighted_10k, mult2_10k, 'o', color = 'b', label = 'trento 10k')
-#plt.plot(weighted_100k, mult2_100k, 'o', color = 'r', label = 'trento 100k')
-#plt.plot(weighted_1M, mult2_1M, 'o', color = 'g', label = 'trento 1M')
-
-#plt.plot(weighted_10k, fit_10k, 'o', color = 'b', label = 'trento 10k')
-plt.plot(weighted_100k, fit_100k, 'o', color = 'r', label = 'trento 100k')
-#plt.plot(weighted_1M, fit_1M, 'o', color = 'g', label = 'trento 1M')
-
-plt.errorbar(Npart,scaled_dNch, yerr = pub_err, fmt = '.', label = 'phenix')
-
-plt.title('phenix data / trento comparison')
-plt.ylabel("(dN$_{ch}$/d$\eta$)/(N$_{part}$/2)")
-plt.xlabel("\nN$_{part}$")
-plt.legend(loc=0)
-
-plt.show()
+if __name__ == '__main__':main()
