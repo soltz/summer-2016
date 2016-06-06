@@ -4,107 +4,203 @@ import matplotlib.pyplot as plt
 from scipy.stats.mstats import mquantiles
 from scipy.interpolate import interp1d
 from scipy.optimize import leastsq
+import getopt, sys
 
+def usage():
+    print 'Fits and compares trento data with Phenix experimental data.'
+    print 'Usage: python phenix_trento_comp.py [options]'
+    print '   -h, --help      : this message'
+    print '   -f, --filename     = file with trento data [AuAu_200GeV_100k.txt]'
 
-def bin_data(trento_file, tot_events):
-    #   import data for trento events
-    data = np.loadtxt(trento_file)
-    #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
+def main():
 
-    #   separate data into its separate parts
-    Npart = data[:,2]
-    mult = data[:,3]
+#   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'hf:', \
+              ['help','filename='])
+    except getopt.GetoptError, err:
+        print str(err) # will print something like 'option -a not recognized'
+        usage()
+        sys.exit(2)
 
-    #   scale mult
-    mult = mult/tot_events
-    mult = mult/(Npart*0.5)
+    filename  = 'AuAu_200GeV_100k.txt'
 
-    p = np.arange(0,1.05,0.05)
-    quan = mquantiles(Npart, prob = p)
-
-    binned_mult, binedges = np.histogram(Npart, bins=quan, weights = mult)
-
-    #   create weighted bin centers
-    weighted_bins = []
-    for i in range(len(binedges) - 1):
-        if i == len(binedges) -2 :
-            weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart <= binedges[i+1])])
+    for o, a in opts:
+        if o in ('-h', '--help'):
+            usage()
+            sys.exit()
+        elif o in ('-f', '--filename'):
+            filename = str(a)
         else:
-            weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart < binedges[i+1])])
-    for i in range(len(weighted_bins)):
-        if i == 0:
-            weighted_bins[i] = 2
-        else:
-            weighted_bins[i] = np.mean(weighted_bins[i])
+            assert False, 'unhandled option'
 
-    #   remove first data points from trento data
-    weighted_bins = weighted_bins[8:len(weighted_bins)-1]
-    binned_mult = binned_mult[8:len(binned_mult)-1]
+    def bin_data(trento_file):
+        #   import data for trento events
+        data = np.loadtxt(trento_file)
+        #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
 
-    return [weighted_bins, binned_mult]
+        #   separate data into its separate parts
+        Npart = data[:,2]
+        mult = data[:,3]
 
-#weighted_10k, mult2_10k = bin_data('auau_10k.txt', 10000)
-weighted_100k, mult2_100k = bin_data('AuAu_200GeV_100k.txt', 100000)
-#weighted_1M, mult2_1M = bin_data('AuAu_200GeV_1M.txt', 1000000)
+        #   scale mult
+        mult = mult/(Npart*0.5)
+
+        p = np.arange(0,1.05,0.05)
+        quan = mquantiles(Npart, prob = p)
+
+        binned_mult, binedges = np.histogram(Npart, bins=quan, weights = mult)
+
+        #   compile values in each bin
+        weighted_bins = []
+        for i in range(len(binedges) - 1):
+            if i == len(binedges) -2 :
+                weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart <= binedges[i+1])])
+            else:
+                weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart < binedges[i+1])])
+
+        #   divide each bin by count of that bin for normalization
+        weighted_bins = np.array(weighted_bins)
+        for i in range(len(weighted_bins)):
+            if len(weighted_bins[i]) == 0:
+                binned_mult[i] = binned_mult[i]
+            else:
+                binned_mult[i] = binned_mult[i]/(len(weighted_bins[i]))
+        weighted_bins = list(weighted_bins)
+            
+        #   record bin error
+        bin_err = []
+        for i in range(len(weighted_bins)):
+            count = len(weighted_bins[i])
+            if count == 0:
+                bin_err.append(0)
+            else:
+                bin_err.append(1/((count)**0.5))
+        bin_err = np.array(bin_err)
+
+        #   average values in each bin
+        for i in range(len(weighted_bins)):
+            if len(weighted_bins[i]) == 0:
+                weighted_bins[i] = 0
+            else:
+                weighted_bins[i] = np.mean(weighted_bins[i])
+
+        return [weighted_bins, binned_mult, bin_err]
+
+    weighted, mult2, bin_err = bin_data(filename)
+
+    #   phenix data
+    if filename  == 'AuAu_200GeV_100k.txt':
+        Npart = np.array([350.9, 297.9, 251.0, 211.0, 176.3, 146.8, 120.9, 98.3, 78.7, 61.9, 47.6, 35.6])
+        Npart = Npart[::-1]
+        dNch = np.array([687.4, 560.4, 456.8, 371.5, 302.5, 245.6, 197.2, 156.4, 123.5, 95.3, 70.9, 52.2])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.22, 0.21, 0.21, 0.21, 0.22, 0.25, 0.28, 0.31, 0.34, 0.38, 0.44, 0.56])
+        pub_err = pub_err[::-1]
+        
+    if filename  == 'AuAu_130GeV_100k.txt':
+        Npart = np.array([347.7, 294.0, 249.5, 211.0, 178.6, 149.7, 124.8, 102.9, 83.2, 66.3, 52.1, 40.1])
+        Npart = Npart[::-1]
+        dNch = np.array([601.8, 488.5, 402.7, 328.8, 270.5, 219.3, 175.7, 139.0, 109.4, 84.1, 64.3, 48.4])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.19, 0.18, 0.17, 0.18, 0.18, 0.19, 0.21, 0.22, 0.25, 0.27, 0.31, 0.35])
+        pub_err = pub_err[::-1]
+
+    if filename  == 'AuAu_62p4GeV_100k.txt':
+        Npart = np.array([342.6, 291.3, 244.5, 205.0, 171.3, 142.2, 116.7, 95.2, 76.1, 59.9, 46.8, 35.8])
+        Npart = Npart[::-1]
+        dNch = np.array([447.5, 367.4, 301.8, 248.0, 203.0, 165.1, 133.0, 105.9, 83.0, 63.9, 48.4, 35.8])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.23, 0.23, 0.23, 0.23, 0.24, 0.24, 0.26, 0.26, 0.28, 0.30, 0.29, 0.30])
+        pub_err = pub_err[::-1]
+        
+    if filename  == 'AuAu_39GeV_100k.txt':
+        Npart = np.array([340.0, 289.6, 244.1, 206.5, 174.1, 145.8, 120.8, 98.6, 79.8, 63.9, 50.3])
+        Npart = Npart[::-1]
+        dNch = np.array([363.2, 297.8, 246.6, 204.4, 168.9, 138.3, 112.6, 90.6, 72.1, 56.8, 43.7])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.19, 0.19, 0.18, 0.18, 0.18, 0.18, 0.20, 0.20, 0.20, 0.22, 0.24])
+        pub_err = pub_err[::-1]
+        
+    if filename  == 'AuAu_27GeV_100k.txt':
+        Npart = np.array([338.9, 288.8, 244.3, 205.7, 173.0, 144.6, 119.4, 97.6, 77.9, 60.8])
+        Npart = Npart[::-1]
+        dNch = np.array([321.2, 258.7, 212.6, 175.0, 143.5, 116.7, 94.2, 75.0, 59.0, 45.7])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.17, 0.16, 0.16, 0.16, 0.15, 0.16, 0.16, 0.16, 0.17, 0.20])
+        pub_err = pub_err[::-1]
+        
+    if filename  == 'AuAu_19p6GeV_100k.txt':
+        Npart = np.array([338.5, 288.3, 242.4, 204.3, 172.4, 143.5, 117.9, 95.7, 77.4, 61.7])
+        Npart = Npart[::-1]
+        dNch = np.array([285.3, 229.3, 188.8, 155.7, 128.2, 104.8, 85.1, 68.4, 54.3, 42.4])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.15, 0.14, 0.14, 0.14, 0.14, 0.14, 0.15, 0.16, 0.16, 0.16])
+        pub_err = pub_err[::-1]
+        
+    if filename  == 'AuAu_15p0GeV_100k.txt':    # phenix data is listed as 14.5 GeV
+        Npart = np.array([337.3, 287.7, 242.5, 205.1, 172.6, 143.6, 119.2, 98.4, 80.2, 63.9])
+        Npart = Npart[::-1]
+        dNch = np.array([250.9, 201.2, 164.5, 134.7, 110.0, 89.4, 72.0, 57.4, 45.2, 34.9])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.13, 0.13, 0.12, 0.12, 0.12, 0.13, 0.13, 0.12, 0.13, 0.12])
+        pub_err = pub_err[::-1]
+        
+    if filename  == 'AuAu_7p7GeV_100k.txt':
+        Npart = np.array([332.1, 283.2, 240.1, 204.1, 172.9, 145.5, 121.0, 98.2, 78.8, 61.8])
+        Npart = Npart[::-1]
+        dNch = np.array([192.4, 159.2, 129.3, 105.4, 85.6, 68.8, 55.0, 43.5, 33.9, 26.1])
+        dNch = dNch[::-1]
+        scaled_dNch = dNch/(Npart*0.5)
+        pub_err = np.array([0.10, 0.10, 0.10, 0.09, 0.09, 0.09, 0.10, 0.10, 0.11, 0.11])
+        pub_err = pub_err[::-1]
+
+    #   remove values from trento data that are outside the range of the phenix data
+    while min(weighted) < min(Npart):
+        weighted = weighted[1:]
+        mult2 = mult2[1:]
+        bin_err = bin_err[1:]
+        
+    while max(weighted) > max(Npart):
+        weighted = weighted[:len(weighted)-1]
+        mult2 = mult2[:len(mult2)-1]
+        bin_err = bin_err[:len(bin_err)-1]
+        
+    #   interpolation
+    inter_func = interp1d(Npart, scaled_dNch, kind = 'quadratic', bounds_error = False)
+    interp = inter_func(weighted)
 
 
-#   phenix data
-#   200 GeV Au Au
-Npart = np.array([350.9, 297.9, 251.0, 211.0, 176.3, 146.8, 120.9, 98.3, 78.7, 61.9, 47.6, 35.6])
-Npart = Npart[::-1]
-Npart_err = np.array([4.7, 6.6, 7.3, 7.3, 7.0, 7.1, 7.0, 6.8, 6.1, 5.2, 4.9, 5.1])
-Npart_err = Npart_err[::-1]
-dNch = np.array([687.4, 560.4, 456.8, 371.5, 302.5, 245.6, 197.2, 156.4, 123.5, 95.3, 70.9, 52.2])
-dNch = dNch[::-1]
-dNch_err = np.array([36.6, 27.9, 22.3, 18.2, 15.8, 13.8, 12.2, 10.9, 9.6, 8.6, 7.6, 6.5])
-dNch_err = dNch_err[::-1]
+    #   fit
+    def residuals(A, y1, y2):
+        err = y2 - (A * y1)
+        return err
+    def eval(x, A):
+        return A * x
+    A0 = np.array([4])
 
-scaled_dNch = dNch/(Npart*0.5)
-pub_err = np.array([0.22, 0.21, 0.21, 0.21, 0.22, 0.25, 0.28, 0.31, 0.34, 0.38, 0.44, 0.56])
-pub_err = pub_err[::-1]
+    A_fit, jac_val = leastsq(residuals, A0, args=(mult2, interp))
+    fit = eval(mult2, A_fit)
+    bin_err = eval(bin_err, A_fit)
+    print "fit parameter: ", A_fit
 
-#   interpolation
-inter_func = interp1d(Npart, scaled_dNch, kind = 'quadratic', bounds_error = False)
-#interp_10k = inter_func(weighted_10k)
-interp_100k = inter_func(weighted_100k)
-#interp_1M = inter_func(weighted_1M)
+    plt.figure(1)
 
-#   fit
-def residuals(A, y1, y2):
-    err = y2 - (A * y1)
-    return err
-def eval(x, A):
-    return A * x
-A0 = np.array([100])
+    plt.errorbar(weighted, fit, yerr = bin_err, fmt = '.', color = 'r', label = 'trento data')
+    plt.errorbar(Npart, scaled_dNch, yerr = pub_err, fmt = '.', color = 'b', label = 'phenix')
 
-#A_10k, jac_val = leastsq(residuals, A0, args=(mult2_10k, interp_10k))
-#fit_10k = eval(mult2_10k, A_10k)
+    plt.title('phenix data / trento comparison')
+    plt.ylabel("(dN$_{ch}$/d$\eta$)/(N$_{part}$/2)")
+    plt.xlabel("\nN$_{part}$")
+    plt.legend(loc=0)
 
-A_100k, jac_val = leastsq(residuals, A0, args=(mult2_100k, interp_100k))
-fit_100k = eval(mult2_100k, A_100k)
+    plt.show()
 
-#A_1M, jac_val = leastsq(residuals, A0, args=(mult2_1M, interp_1M))
-#fit_1M = eval(mult2_1M, A_1M)
-
-plt.figure(1)
-
-#plt.plot(weighted_10k, interp_10k, '^', color = 'b', label = 'interp_10k')
-#plt.plot(weighted_100k, interp_100k, '^', color = 'r', label = 'interp_100k')
-#plt.plot(weighted_1M, interp_1M, '^', color = 'g', label = 'interp_1M')
-
-#plt.plot(weighted_10k, mult2_10k, 'o', color = 'b', label = 'trento 10k')
-#plt.plot(weighted_100k, mult2_100k, 'o', color = 'r', label = 'trento 100k')
-#plt.plot(weighted_1M, mult2_1M, 'o', color = 'g', label = 'trento 1M')
-
-#plt.plot(weighted_10k, fit_10k, 'o', color = 'b', label = 'trento 10k')
-plt.plot(weighted_100k, fit_100k, 'o', color = 'r', label = 'trento 100k')
-#plt.plot(weighted_1M, fit_1M, 'o', color = 'g', label = 'trento 1M')
-
-plt.errorbar(Npart,scaled_dNch, yerr = pub_err, fmt = '.', label = 'phenix')
-
-plt.title('phenix data / trento comparison')
-plt.ylabel("(dN$_{ch}$/d$\eta$)/(N$_{part}$/2)")
-plt.xlabel("\nN$_{part}$")
-plt.legend(loc=0)
-
-plt.show()
+if __name__ == '__main__':main()
