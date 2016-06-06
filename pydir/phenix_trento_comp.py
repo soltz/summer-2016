@@ -11,21 +11,19 @@ def usage():
     print 'Usage: python phenix_trento_comp.py [options]'
     print '   -h, --help      : this message'
     print '   -f, --filename     = file with trento data [AuAu_200GeV_100k.txt]'
-    print '   -e, --events     = number of trento events contained in file [100000]'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hf:e:', \
-              ['help','filename=','events='])
+        opts, args = getopt.getopt(sys.argv[1:], 'hf:', \
+              ['help','filename='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
         sys.exit(2)
 
     filename  = 'AuAu_200GeV_100k.txt'
-    events = 100000
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -33,12 +31,10 @@ def main():
             sys.exit()
         elif o in ('-f', '--filename'):
             filename = str(a)
-        elif o in ('-e', '--events'):
-            events = float(a)
         else:
             assert False, 'unhandled option'
 
-    def bin_data(trento_file, tot_events):
+    def bin_data(trento_file):
         #   import data for trento events
         data = np.loadtxt(trento_file)
         #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
@@ -48,7 +44,6 @@ def main():
         mult = data[:,3]
 
         #   scale mult
-        mult = mult/tot_events
         mult = mult/(Npart*0.5)
 
         p = np.arange(0,1.05,0.05)
@@ -63,19 +58,30 @@ def main():
                 weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart <= binedges[i+1])])
             else:
                 weighted_bins.append(Npart[(Npart >= binedges[i]) & (Npart < binedges[i+1])])
+
+        #   divide each bin by count of that bin for normalization
+        weighted_bins = np.array(weighted_bins)
+        for i in range(len(weighted_bins)):
+            if len(weighted_bins[i]) == 0:
+                binned_mult[i] = binned_mult[i]
+            else:
+                binned_mult[i] = binned_mult[i]/(len(weighted_bins[i]))
+        weighted_bins = list(weighted_bins)
             
         #   record bin error
         bin_err = []
         for i in range(len(weighted_bins)):
             count = len(weighted_bins[i])
-            bin_err.append((count)**0.5)
+            if count == 0:
+                bin_err.append(0)
+            else:
+                bin_err.append(1/((count)**0.5))
         bin_err = np.array(bin_err)
-        bin_err = bin_err/tot_events
 
         #   average values in each bin
         for i in range(len(weighted_bins)):
             if i == 0:
-                weighted_bins[i] = 2
+                weighted_bins[i] = 0
             else:
                 weighted_bins[i] = np.mean(weighted_bins[i])
 
@@ -86,7 +92,7 @@ def main():
 
         return [weighted_bins, binned_mult, bin_err]
 
-    weighted, mult2, bin_err = bin_data(filename, events)
+    weighted, mult2, bin_err = bin_data(filename)
 
     #   phenix data
     #   200 GeV Au Au
