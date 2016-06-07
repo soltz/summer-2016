@@ -12,6 +12,9 @@ data = np.loadtxt('AuAu_200GeV_100k.txt')
 mult = data[:,3]
 e2 = data[:,4]
 
+#   apply proportionality constanst to convert initial entropy to charged multiplicity
+mult = 4.65905256 * mult
+
 #   change the constituents of mult to int values
 for i in range(len(mult)):
     mult[i] = round(mult[i])
