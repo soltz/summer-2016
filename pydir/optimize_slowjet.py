@@ -1,5 +1,6 @@
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import math
 import pythia8
@@ -72,14 +73,18 @@ nSel = 2
 
 radius = 0.4
 pTjetMin = 18
-var_radius = np.arange(0,1.2,0.008)
-var_pTjetMin = np.arange(5,40,0.2)
+var_radius = np.arange(0,1.2,0.1)
+var_pTjetMin = np.arange(5,40,1)
 pTjetMin_list = []
 radius_list = []
 jets_found_pT = []
 jets_found_rad = []
 
-for i in range(10):
+tot_radius = []
+tot_pTjetMin = []
+tot_jets_found = []
+
+for i in range(100):
 
     pT = []
     phi = []
@@ -143,6 +148,48 @@ for i in range(10):
         jets_found_rad.append(jets_found)
         radius_list.append(rad)
 
+    for pTjet in var_pTjetMin:
+        for rad in var_radius:
+            slowJet = pythia8.SlowJet( -1, rad, pTjet, etaMax, nSel, 1)
+            slowJet.analyze(pythia.event)
+            jets_found = slowJet.sizeJet()
+
+            tot_radius.append(rad)
+            tot_pTjetMin.append(pTjet)
+            tot_jets_found.append(jets_found)
+
+#   Create bins using np.histogram2d(), the number of bins produced is the square of the value "b"
+b = 10
+tot_bins = b**2
+bin_counts, xedges, yedges = np.histogram2d(tot_pTjetMin,tot_radius,bins=b)
+height, xedges, yedges = np.histogram2d(tot_pTjetMin,tot_radius,bins=[xedges,yedges],weights=tot_jets_found)
+bin_counts = np.concatenate(bin_counts)
+height = np.concatenate(height)
+
+#   The bins are normalized by dividing each bin by the sample size within that bin
+av_jets_found = height/bin_counts
+
+xcenters = 0.5*(xedges[1:]+xedges[:-1])
+xcenters = np.repeat(xcenters,b)
+ycenters = 0.5*(yedges[1:]+yedges[:-1])
+ycenters = np.tile(ycenters,b)
+
+#   dx and dy define the thickness of the histogram bars
+dx = (xedges[1]-xedges[0])
+dy = (yedges[1]-yedges[0])
+
+base = np.zeros(len(height))
+
+#   2d histogram is plotted showing average jets_found for differing values of pTjetMin and radius
+fig = plt.figure(2)
+ax = fig.add_subplot(111, projection='3d')
+ax.bar3d(xcenters,ycenters,base,dx,dy,av_jets_found,color='b',alpha=1)
+
+ax.set_xlabel('pTjetMin',fontsize=20)
+ax.set_ylabel('radius',fontsize=20)
+ax.set_zlabel('average jets_found/event')
+
+#   separate 1d plots are made for both pTjetMin and radius       
 plt.figure(1)
 plt.subplot(211)
 plt.plot(pTjetMin_list,jets_found_pT,'o', alpha = 0.2)
