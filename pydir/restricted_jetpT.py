@@ -10,33 +10,69 @@ def usage():
     print 'Shows the frequency of slowJet jet pT when the pT of pythia events is restricted to 20-25 GeV/c.'
     print 'Usage: python 3d_jetplot_2016.py [options]'
     print '   -h, --help      : this message'
-    print '   -t, --trento     = include trento background True/False [True]'
+    print '   -t, --trento     : include trento background'
+    print '   -f, --file     = set trento data file [AuAu_200GeV_100k.txt]'
+    print '   -e, --eCM     = pythia beam center-of-mass energy (GeV) [200.0]'
+    print '   -n, --pTHatMin     = pythia minimum jet pT [20.0]'
+    print '   -x, --pTHatMax     = pythia maximum jet pT [25.0]'
+    print '   -s, --seed     = pythia initial random number seed [-1]'
+    print '   -c, --QCD     = pythia hard QCD processes on/off [on]'
+    print '   -q, --QED     = pythia hard QED processes on/off [off]'
+    print '   -p, --pTjetMin     = minimum slowJet pT [15]'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'ht:', \
-              ['help','trento='])
+        opts, args = getopt.getopt(sys.argv[1:], 'htf:e:n:x:s:c:q:p:', \
+              ['help','trento','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD=','QED=','pTjetMin='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
         sys.exit(2)
 
-    trento  = True
+    trento  = False
+    trento_file = 'AuAu_200GeV_100k.txt'
+    
+    # pythia settings
+    eCM  = 200.0
+    pTHatMin  = 20.0
+    pTHatMax  = 25.0
+    seed  = -1
+    QCD = 'on'
+    QED = 'off'
+
+    # minimum slowJet pT
+    pTjetMin = 15
 
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
             sys.exit()
         elif o in ('-t', '--trento'):
-            trento = a
+            trento = True
+        elif o in ('-f', '--file'):
+            trento_file = str(a)
+        elif o in ('-e', '--eCM'):
+            eCM = float(a)
+        elif o in ('-n', '--pTHatMin'):
+            pTHatMin = float(a)
+        elif o in ('-x', '--pTHatMax'):
+            pTHatMax = float(a)
+        elif o in ('-s', '--seed'):
+            seed = int(a)
+        elif o in ('-c', '--QCD'):
+            QCD = str(a)
+        elif o in ('-q', '--QED'):
+            QED = str(a)
+        elif o in ('-p', '--pTjetMin'):
+            pTjetMin = float(a)
         else:
             assert False, 'unhandled option'
 
     if trento:
         #   load trento data for 100,000 Au Au events
-        data = np.loadtxt('AuAu_200GeV_100k.txt')
+        data = np.loadtxt(trento_file)
         
         #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
         #   create a list for the initial entropy of the events
@@ -64,14 +100,6 @@ def main():
     # e2 scaling parameter for elliptic flow
     # from Alver and Roland, PRC81.054905 (2010), fig 4
     rho_2 = 0.15
-    
-    # pythia settings
-    eCM  = 200.0
-    pTHatMin  = 20.0
-    pTHatMax  = 25.0
-    seed  = -1
-    QCD = 'on'
-    QED = 'off'
     
     #   Initialize Pythia
     pythia = pythia8.Pythia()
@@ -106,7 +134,6 @@ def main():
     etaMax = 4.
     nSel = 2    
     radius = [0.2,0.4,0.6,0.8]
-    pTjetMin = 15
     
     slowJet_pT = [[],[],[],[]]
     
@@ -181,9 +208,17 @@ def main():
         plt.plot(weighted,counts,'o',label=plt_label)
         
     plt.ylabel('counts')
+    
     xlabel = 'slowJet_pT: pTjetMin = ' + str(pTjetMin)
     plt.xlabel(xlabel)
-    plt.title('slowJet_pT for pythia jets restricted to 20-25 GeV/c pT')
+    
+    title = 'slowJet_pT for pythia jet pT restricted to 20-25 GeV/c: trento '
+    if trento:
+        title = title + 'on'
+    else:
+        title = title + 'off'
+    plt.title(title)
+    
     plt.legend(loc=0)
     plt.show()
     
