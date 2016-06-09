@@ -7,8 +7,8 @@ import pythia8
 import getopt, sys
 
 def usage():
-    print 'Shows the frequency of slowJet jet pT when the pT of pythia events is restricted to 20-25 GeV/c.'
-    print 'Usage: python restricted_jetpT.py [options]'
+    print 'Shows the frequency of reconstructed jet xi values when the pT of pythia events is restricted to 20-25 GeV/c.'
+    print 'Usage: python xi_reconstructed_jets.py [options]'
     print '   -h, --help      : this message'
     print '   -t, --trento     : include trento background'
     print '   -f, --file     = set trento data file [AuAu_200GeV_100k.txt]'
@@ -20,13 +20,15 @@ def usage():
     print '   -q, --QED     = pythia hard QED processes on/off [off]'
     print '   -m, --num_events     = number of pythia events to analyze [1000]'
     print '   -p, --pTjetMin     = minimum slowJet pT [15]'
+    print '   -r, --radius     = slowJet radius [0.5]'
+    print '   -b, --bins     = number of histogram bins [30]'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htf:e:n:x:s:c:q:m:p:', \
-              ['help','trento','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD=','QED=','num_events=','pTjetMin='])
+        opts, args = getopt.getopt(sys.argv[1:], 'htf:e:n:x:s:c:q:m:p:r:b:', \
+              ['help','trento','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD=','QED=','num_events=','pTjetMin=','radius=','bins='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -44,8 +46,11 @@ def main():
     QED = 'off'
     num_events = 1000
 
-    # minimum slowJet pT
+    # slowJet settings
     pTjetMin = 15
+    radius = 0.5
+
+    bins = 30
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -71,6 +76,10 @@ def main():
             num_events = int(a)
         elif o in ('-p', '--pTjetMin'):
             pTjetMin = float(a)
+        elif o in ('-r', '--radius'):
+            radius = float(a)
+        elif o in ('-b', '--bins'):
+            bins = int(a)
         else:
             assert False, 'unhandled option'
 
@@ -137,9 +146,8 @@ def main():
     #   Initialize SlowJet
     etaMax = 4.
     nSel = 2    
-    radius = np.arange(0.3,0.8,0.1)
     
-    slowJet_pT = [[] for i in range(len(radius))]
+    xi = []
     
     for i in range(num_events):
     
@@ -182,48 +190,54 @@ def main():
                 E = (pT_wflow**2 + pz**2 + mpi**2)**0.5
                 pythia.event.append(211, 91, 0, 0, px, py, pz, E, mpi, 0., 9.)
             
-        for j in range(len(radius)):
-            slowJet = pythia8.SlowJet( -1, radius[j], pTjetMin, etaMax, nSel, 1)
-            slowJet.analyze(pythia.event)
-            jets_found = slowJet.sizeJet()
-        
-            for k in range(jets_found):
-                pT_jet = slowJet.pT(k)
-                slowJet_pT[j].append(pT_jet)
-    
-    for i in range(len(radius)):
-        slowJet_pT[i] = np.array(slowJet_pT[i])
-        
-        counts, binedges = np.histogram(slowJet_pT[i], bins = 40)
-        
-        #   create weighted bin centers
-        weighted = []
-        
-        for j in range(len(binedges) - 1):
-            if j == len(binedges) -2 :
-                weighted.append(slowJet_pT[i][(slowJet_pT[i] >= binedges[j]) & (slowJet_pT[i] <= binedges[j+1])])
-            else:
-                weighted.append(slowJet_pT[i][(slowJet_pT[i] >= binedges[j]) & (slowJet_pT[i] < binedges[j+1])])
-        
-        for j in range(len(weighted)):
-            weighted[j] = np.mean(weighted[j])
-        
-        plt_label = "rad: " + str(radius[i])
-        plt.plot(weighted,counts,'o',label=plt_label)
-        
+        slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1)
+        slowJet.analyze(pythia.event)
+        jets_found = slowJet.sizeJet()
+
+        # Extract jet constituents and convert nested list for ease of manipulation
+        slowJetPrtList = [[] for j in range(jets_found)]
+        for j in range(jets_found):
+            slowJetPrtList[j] = list(slowJet.constituents(j))
+
+        for j in range(pythia.event.size()):
+            prt = pythia.event[j]
+            if prt.isFinal():
+                for k in range(len(slowJetPrtList)):
+                    inJet = -1
+                    if j in slowJetPrtList[k]:
+                        inJet = k
+                    if (inJet >= 0):
+                        jet_pT = slowJet.pT(k)
+                        jet_phi = slowJet.phi(k)
+                        jet_eta = slowJet.y(k)
+                        
+                        prt_pT = prt.pT()
+                        prt_phi = prt.phi()
+                        prt_eta = prt.eta()
+
+                        jet_px = jet_pT * math.cos(jet_phi)
+                        jet_py = jet_pT * math.sin(jet_phi)
+                        jet_pz = jet_pT * math.sinh(jet_eta)
+                        
+                        prt_px = prt_pT * math.cos(prt_phi)
+                        prt_py = prt_pT * math.sin(prt_phi)
+                        prt_pz = prt_pT * math.sinh(prt_eta)
+
+                        prt_xi = math.log((jet_px**2 + jet_py**2 + jet_pz**2)/(prt_px*jet_px + prt_py*jet_py + prt_pz*jet_pz))
+                        xi.append(prt_xi)
+            
+    plt.hist(xi, bins = bins)
+
+    plt.xlabel('xi')
     plt.ylabel('counts')
     
-    xlabel = 'slowJet_pT: pTjetMin = ' + str(pTjetMin)
-    plt.xlabel(xlabel)
-    
-    title = 'slowJet_pT for pythia jet pT restricted to 20-25 GeV/c: trento '
+    title = 'Values of xi for reconstructed jets: trento '
     if trento:
         title = title + 'on'
     else:
         title = title + 'off'
     plt.title(title)
     
-    plt.legend(loc=0)
     plt.show()
     
 if __name__ == '__main__':main()
