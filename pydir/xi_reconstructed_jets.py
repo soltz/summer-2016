@@ -211,17 +211,13 @@ def main():
                         jet_phi = slowJet.phi(k)
                         jet_eta = slowJet.y(k)
                         
-                        prt_pT = prt.pT()
-                        prt_phi = prt.phi()
-                        prt_eta = prt.eta()
+                        prt_px = prt.px()
+                        prt_py = prt.py()
+                        prt_pz = prt.pz()
 
                         jet_px = jet_pT * math.cos(jet_phi)
                         jet_py = jet_pT * math.sin(jet_phi)
                         jet_pz = jet_pT * math.sinh(jet_eta)
-                        
-                        prt_px = prt_pT * math.cos(prt_phi)
-                        prt_py = prt_pT * math.sin(prt_phi)
-                        prt_pz = prt_pT * math.sinh(prt_eta)
 
                         prt_xi = math.log((jet_px**2 + jet_py**2 + jet_pz**2)/(prt_px*jet_px + prt_py*jet_py + prt_pz*jet_pz))
                         xi.append(prt_xi)
