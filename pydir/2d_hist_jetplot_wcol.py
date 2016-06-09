@@ -10,31 +10,43 @@ import numpy as np
 import getopt, sys
 
 def usage():
-    print '3d_jetplot_2016.py plots a 3d bar graph for p-p events created by pythia8.'
-    print 'Usage: python 3d_jetplot_2016.py [options]'
+    print 'Plots a 2d histogram for pythia p-p events and identifies jets as red with slowJet.'
+    print 'Usage: python 2d_hist_jetplot_wcol.py [options]'
     print '   -h, --help      : this message'
     print '   -e, --eCM     = beam center-of-mass energy (GeV) [200.0]'
-    print '   -p, --pTHatMin     = minimum jet pT [20.0]'
+    print '   -n, --pTHatMin     = minimum jet pT [20.0]'
+    print '   -m, --pTHatMax     = maximum jet pT [25.0]'
     print '   -s, --seed     = initial random number seed [-1]'
-    print '   -c, --QCD     = hard QCD processes on/off [on]'
-    print '   -q, --QED     = hard QED processes on/off [off]'
+    print '   -c, --QCD     : turn hard QCD processes off'
+    print '   -q, --QED     : turn hard QED processes on'
+    print '   -p, --pTjetMin     = minimum slowJet pT [10]'
+    print '   -r, --radius     = slowJet radius [0.7]'
+    print '   -b, --bins     = number of histogram bins on each axis [20]'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'he:p:s:c:q:', \
-              ['help','eCM=','pTHatMin=','seed=','QCD=','QED='])
+        opts, args = getopt.getopt(sys.argv[1:], 'he:n:m:s:cqp:r:b:', \
+              ['help','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
         sys.exit(2)
 
+    # pythia settings
     eCM  = 200.0
     pTHatMin  = 20.0
+    pTHatMax  = 25.0
     seed  = -1
     QCD = 'on'
     QED = 'off'
+
+    # slowJet settings
+    radius = 0.7
+    pTjetMin = 10.
+
+    bins = 20
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -42,14 +54,22 @@ def main():
             sys.exit()
         elif o in ('-e', '--eCM'):
             eCM = float(a)
-        elif o in ('-p', '--pTHatMin'):
+        elif o in ('-n', '--pTHatMin'):
             pTHatMin = float(a)
+        elif o in ('-m', '--pTHatMax'):
+            pTHatMax = float(a)
         elif o in ('-s', '--seed'):
             seed = int(a)
         elif o in ('-c', '--QCD'):
-            QCD = str(a)
+            QCD = 'off'
         elif o in ('-q', '--QED'):
-            QED = str(a)
+            QED = 'on'
+        elif o in ('-p', '--pTjetMin'):
+            pTjetMin = float(a)
+        elif o in ('-r', '--radius'):
+            radius = float(a)
+        elif o in ('-b', '--bins'):
+            bins = int(a)
         else:
             assert False, 'unhandled option'
 
@@ -70,6 +90,10 @@ def main():
     set_pTHatMin = "PhaseSpace:pTHatMin = " + pTHatMin
     pythia.readString(set_pTHatMin)
 
+    pTHatMax = str(pTHatMax)
+    set_pTHatMax = "PhaseSpace:pTHatMax = " + pTHatMax
+    pythia.readString(set_pTHatMax)
+
     pythia.readString("Random:setseed = on")
     
     seed = str(seed)
@@ -80,8 +104,6 @@ def main():
 
 #   Initialize SlowJet
     etaMax = 4.
-    radius = 0.7
-    pTjetMin = 10.
     nSel = 2    
     slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1);
     
@@ -130,14 +152,13 @@ def main():
                 
 
 #   Create bins using np.histogram2d(), the number of bins produced is the square of the value "b"
-        b = 20
-        tot_bins = b**2
-        bg_h, xedges, yedges = np.histogram2d(bg_eta,bg_phi,bins=b,range=[[-6,6], [-(np.pi), np.pi]],weights=bg_eT)
+        tot_bins = bins**2
+        bg_h, xedges, yedges = np.histogram2d(bg_eta,bg_phi,bins=bins,range=[[-6,6], [-(np.pi), np.pi]],weights=bg_eT)
         bg_h = np.concatenate(bg_h)
         xcenters = 0.5*(xedges[1:]+xedges[:-1])
-        xcenters = np.repeat(xcenters,b)
+        xcenters = np.repeat(xcenters,bins)
         ycenters = 0.5*(yedges[1:]+yedges[:-1])
-        ycenters = np.tile(ycenters,b)
+        ycenters = np.tile(ycenters,bins)
 
 #   Data from jet particles is binned separately        
         jet_h, jet_xedges, jet_yedges = np.histogram2d(jet_eta,jet_phi,bins=[xedges,yedges],weights=jet_eT)

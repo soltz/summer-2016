@@ -238,6 +238,14 @@ def main():
         title = title + 'off'
     plt.title(title)
     
-    plt.show()
+    plt.show(block = False)
+
+    query = raw_input("<CR> to continue, p to save to png: ")
+    if (query=='p'):
+        query = raw_input("name this png file (do not include extension .png): ")
+        filename = query + '.png'
+        plt.savefig(filename)
+        print 'file saved'
+        query = raw_input("<CR> to continue: ")
     
 if __name__ == '__main__':main()
