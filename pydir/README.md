@@ -22,7 +22,8 @@ slowJetpT_vs_pTHatQED.py
  -creates a 2d histogram from 200 GeV Au Au trento data
      -the x and y axes of the histogram are pseudorapidity and azimuthal angle phi
      -the bars of the histogram are weighted by pT
- -e2 flow is considered	 
+ -e2 flow is considered
+- command line options shown with -h	 
 
 getopt_sample.py
  -example program showing how to add options to python programs
@@ -70,6 +71,19 @@ pythia_slowjet_trento_hist.py
      -bars from pythia particles identified as jets are colored red
      -bars from trento particles identified as jets are colored yellow
      -other trento particles are lightblue and other pythia particles are blue
+ -command line options shown with -h
+      -pythia or trento data can be turned off
+      -QED processes can be enabled
+	  -various slowJet and pythia settings can be changed
+
+xi_reconstructed_jets.py
+ -creates a histogram of xi values for both trento and pythia data
+ -jets are reconstructed using slowJet
+ -command line options shown with -h
+
+xi_true_jets.py
+ -test program that creates a histogram of xi values for pythia jets
+ -program is incomplete
 
 trento_in_python.py
  -creates plots with trento data for the following:
