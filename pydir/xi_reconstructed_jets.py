@@ -11,6 +11,7 @@ def usage():
     print 'Usage: python xi_reconstructed_jets.py [options]'
     print '   -h, --help      : this message'
     print '   -t, --trento     : include trento background'
+    print '   -o, --pythia     : turn pythia events off and trento is turned on'
     print '   -f, --file     = set trento data file [AuAu_200GeV_100k.txt]'
     print '   -e, --eCM     = pythia beam center-of-mass energy (GeV) [200.0]'
     print '   -n, --pTHatMin     = pythia minimum jet pT [20.0]'
@@ -27,8 +28,8 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htf:e:n:x:s:c:q:m:p:r:b:', \
-              ['help','trento','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD=','QED=','num_events=','pTjetMin=','radius=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'htof:e:n:x:s:c:q:m:p:r:b:', \
+              ['help','trento''pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD=','QED=','num_events=','pTjetMin=','radius=','bins='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -36,6 +37,7 @@ def main():
 
     trento  = False
     trento_file = 'AuAu_200GeV_100k.txt'
+    pythia_on = True
     
     # pythia settings
     eCM  = 200.0
@@ -57,6 +59,9 @@ def main():
             usage()
             sys.exit()
         elif o in ('-t', '--trento'):
+            trento = True
+        elif o in ('-o', '--pythia'):
+            pythia_on = False
             trento = True
         elif o in ('-f', '--file'):
             trento_file = str(a)
@@ -152,7 +157,8 @@ def main():
     for i in range(num_events):
     
         pythia.event.reset()
-        pythia.next()
+        if pythia_on:
+            pythia.next()
 
         if trento:
             for j in range(mult[i]):
@@ -232,6 +238,10 @@ def main():
         title = title + 'on'
     else:
         title = title + 'off'
+    if pythia_on:
+        title = title + ', pythia on'
+    else:
+        title = title + ', pythia off'
     plt.title(title)
     
     plt.show(block = False)
