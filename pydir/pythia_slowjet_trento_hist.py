@@ -417,21 +417,27 @@ def main():
         ax.set_zlabel('eT (GeV)')
 
         if trento:
-            title = 'slowJet in pythia w/ trento background'
+            title = '\nslowJet in pythia with trento background' + '\ntrento multiplicity = ' + str(mult[i])
         if not pythia_on:
-            title = 'slowJet in trento background'
-        else:
-            title = 'slowJet in pythia'
+            title = '\nslowJet in trento background without pythia' + '\ntrento multiplicity = ' + str(mult[i])
+        if not trento:
+            title = 'slowJet in pythia without trento background'
         plt.title(title)
         
         pi = np.pi
         plt.ylim(-pi,pi)
 
         if pythia_on:
-            for j in range(2):
-                pT_jet = slowJet.pT(j)
-                pT_label = 'slowJet pT = %.2f' % pT_jet
-                ax.text(slowJet.y(j),slowJet.phi(j),max(h)+1,pT_label,horizontalalignment='center')
+            if slowJet.sizeJet() >= 2:
+                for j in range(2):
+                    pT_jet = slowJet.pT(j)
+                    pT_label = 'slowJet pT = %.2f' % pT_jet
+                    ax.text(slowJet.y(j),slowJet.phi(j),max(h)+1,pT_label,horizontalalignment='center')
+            else:
+                for j in range(slowJet.sizeJet()):
+                    pT_jet = slowJet.pT(j)
+                    pT_label = 'slowJet pT = %.2f' % pT_jet
+                    ax.text(slowJet.y(j),slowJet.phi(j),max(h)+1,pT_label,horizontalalignment='center')
         
         plt.show(block = False)
     
