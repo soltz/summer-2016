@@ -17,8 +17,8 @@ def usage():
     print '   -n, --pTHatMin     = pythia minimum jet pT [20.0]'
     print '   -x, --pTHatMax     = pythia maximum jet pT [25.0]'
     print '   -s, --seed     = pythia initial random number seed [-1]'
-    print '   -c, --QCD     = pythia hard QCD processes on/off [on]'
-    print '   -q, --QED     = pythia hard QED processes on/off [off]'
+    print '   -c, --QCD     : turn pythia hard QCD processes off'
+    print '   -q, --QED     : turn pythia hard QED processes on'
     print '   -m, --num_events     = number of pythia events to analyze [1000]'
     print '   -p, --pTjetMin     = minimum slowJet pT [15]'
     print '   -r, --radius     = slowJet radius [0.5]'
@@ -28,8 +28,8 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htof:e:n:x:s:c:q:m:p:r:b:', \
-              ['help','trento''pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD=','QED=','num_events=','pTjetMin=','radius=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'htof:e:n:x:s:cqm:p:r:b:', \
+              ['help','trento''pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','num_events=','pTjetMin=','radius=','bins='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -74,9 +74,9 @@ def main():
         elif o in ('-s', '--seed'):
             seed = int(a)
         elif o in ('-c', '--QCD'):
-            QCD = str(a)
+            QCD = 'off'
         elif o in ('-q', '--QED'):
-            QED = str(a)
+            QED = 'on'
         elif o in ('-m', '--num_events'):
             num_events = int(a)
         elif o in ('-p', '--pTjetMin'):
@@ -162,7 +162,9 @@ def main():
 
         if trento:
             for j in range(mult[i]):
-                r1, r2, r3, r4 = np.random.random(4)
+                r1, r2, r3, r4, r5 = np.random.random(5)
+                while r5 > 0.99:
+                    r5 = np.random.random(1)
             
                 # pT = transverse momentum
                 pT_r1 = T*(math.sqrt(-2*math.log(r1)))
@@ -175,9 +177,38 @@ def main():
             
                 # rho = normalized radial distance 
                 rho_r4 = r4**0.5
+
+                # particle selected randomly
+                if r5 <= 0.11:
+                    mass = 0.140
+                    pid = 211 # pi+
+                if r5 > 0.11 and r5 <= 0.22:
+                    mass = 0.140
+                    pid = -211 # pi-
+                if r5 > 0.22 and r5 <= 0.33:
+                    mass = 0.135
+                    pid = 111 # pi0
+                if r5 > 0.33 and r5 <= 0.44:
+                    mass = 0.494
+                    pid = 321 # K+
+                if r5 > 0.44 and r5 <= 0.55:
+                    mass = 0.494
+                    pid = -321 # K-
+                if r5 > 0.55 and r5 <= 0.66:
+                    mass = 0.938
+                    pid = 2212 # p
+                if r5 > 0.66 and r5 <= 0.77:
+                    mass = 0.938
+                    pid = -2212 # pbar
+                if r5 > 0.77 and r5 <= 0.88:
+                    mass = 0.940
+                    pid = 2112 # n
+                if r5 > 0.88 and r5 <= 0.99:
+                    mass = 0.940
+                    pid = -2112 # nbar
             
                 # calculate initial transverse rapidity (yT)
-                eT = (mpi*mpi+pT_r1*pT_r1)**0.5
+                eT = (mass*mass+pT_r1*pT_r1)**0.5
                 yT = 0.5 * np.log((eT+pT_r1)/(eT-pT_r1))
                 pT_initial = pT_r1
                 yT_initial = yT
@@ -187,14 +218,14 @@ def main():
                 yT = yT_initial + yBoost
             
                 # convert back to pT
-                pT_wflow = mpi*np.cosh(yT)
+                pT_wflow = mass*np.cosh(yT)
             
                 # add particles to the event list
                 px = pT_wflow * math.cos(phi_r2)
                 py = pT_wflow * math.sin(phi_r2)
                 pz = pT_wflow * math.sinh(eta_r3)
-                E = (pT_wflow**2 + pz**2 + mpi**2)**0.5
-                pythia.event.append(211, 91, 0, 0, px, py, pz, E, mpi, 0., 9.)
+                E = (pT_wflow**2 + pz**2 + mass**2)**0.5
+                pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
             
         slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1)
         slowJet.analyze(pythia.event)
@@ -215,7 +246,7 @@ def main():
                     if (inJet >= 0):
                         jet_pT = slowJet.pT(k)
                         jet_phi = slowJet.phi(k)
-                        jet_eta = slowJet.y(k)
+                        jet_y = slowJet.y(k)
                         
                         prt_px = prt.px()
                         prt_py = prt.py()
@@ -223,7 +254,7 @@ def main():
 
                         jet_px = jet_pT * math.cos(jet_phi)
                         jet_py = jet_pT * math.sin(jet_phi)
-                        jet_pz = jet_pT * math.sinh(jet_eta)
+                        jet_pz = jet_pT * math.sinh(jet_y)
 
                         prt_xi = math.log((jet_px**2 + jet_py**2 + jet_pz**2)/(prt_px*jet_px + prt_py*jet_py + prt_pz*jet_pz))
                         xi.append(prt_xi)
