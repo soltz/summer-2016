@@ -47,7 +47,7 @@ def main():
     QED = 'off'
 
     # slowJet settings
-    pTjetMin = 10
+    pTjetMin = 15
     radius = 0.7
 
     bins = 20
@@ -198,7 +198,9 @@ def main():
 
         if trento:
             for j in range(mult[i]):
-                r1, r2, r3, r4 = np.random.random(4)
+                r1, r2, r3, r4, r5= np.random.random(5)
+                while r5 > 0.99:
+                    r5 = np.random.random(1)
         
                 # pT = transverse momentum
                 pT_r1 = T*(math.sqrt(-2*math.log(r1)))
@@ -211,9 +213,38 @@ def main():
         
                 # rho = normalized radial distance 
                 rho_r4 = r4**0.5
+
+                # particle selected randomly
+                if r5 <= 0.11:
+                    mass = 0.140
+                    pid = 211 # pi+
+                if r5 > 0.11 and r5 <= 0.22:
+                    mass = 0.140
+                    pid = -211 # pi-
+                if r5 > 0.22 and r5 <= 0.33:
+                    mass = 0.135
+                    pid = 111 # pi0
+                if r5 > 0.33 and r5 <= 0.44:
+                    mass = 0.494
+                    pid = 321 # K+
+                if r5 > 0.44 and r5 <= 0.55:
+                    mass = 0.494
+                    pid = -321 # K-
+                if r5 > 0.55 and r5 <= 0.66:
+                    mass = 0.938
+                    pid = 2212 # p
+                if r5 > 0.66 and r5 <= 0.77:
+                    mass = 0.938
+                    pid = -2212 # pbar
+                if r5 > 0.77 and r5 <= 0.88:
+                    mass = 0.940
+                    pid = 2112 # n
+                if r5 > 0.88 and r5 <= 0.99:
+                    mass = 0.940
+                    pid = -2112 # nbar
         
                 # calculate initial transverse rapidity (yT)
-                eT = (mpi*mpi+pT_r1*pT_r1)**0.5
+                eT = (mass*mass+pT_r1*pT_r1)**0.5
                 yT = 0.5 * np.log((eT+pT_r1)/(eT-pT_r1))
                 pT_initial = pT_r1
                 yT_initial = yT
@@ -223,7 +254,7 @@ def main():
                 yT = yT_initial + yBoost
         
                 # convert back to pT
-                pT_wflow = mpi*np.cosh(yT)
+                pT_wflow = mass*np.cosh(yT)
         
                 pT.append(pT_wflow)
                 phi.append(phi_r2)
@@ -233,8 +264,8 @@ def main():
                 px = pT_wflow * math.cos(phi_r2)
                 py = pT_wflow * math.sin(phi_r2)
                 pz = pT_wflow * math.sinh(eta_r3)
-                E = (pT_wflow**2 + pz**2 + mpi**2)**0.5
-                pythia.event.append(211, 91, 0, 0, px, py, pz, E, mpi, 0., 9.)
+                E = (pT_wflow**2 + pz**2 + mass**2)**0.5
+                pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
         
         slowJet.analyze(pythia.event)
     
@@ -427,21 +458,26 @@ def main():
         pi = np.pi
         plt.ylim(-pi,pi)
 
+        m = max(h)
+        index = [j for j, k in enumerate(h) if k == m]
+
         if pythia_on:
             if slowJet.sizeJet() >= 2:
                 for j in range(2):
                     pT_jet = slowJet.pT(j)
                     pT_label = 'slowJet pT = %.2f' % pT_jet
-                    ax.text(slowJet.y(j),slowJet.phi(j),max(h)+1,pT_label,horizontalalignment='center')
+                    ax.text(slowJet.y(j), slowJet.phi(j), max(h) + base[index[0]] +1, pT_label, horizontalalignment='center')
             else:
                 for j in range(slowJet.sizeJet()):
                     pT_jet = slowJet.pT(j)
                     pT_label = 'slowJet pT = %.2f' % pT_jet
-                    ax.text(slowJet.y(j),slowJet.phi(j),max(h)+1,pT_label,horizontalalignment='center')
+                    ax.text(slowJet.y(j), slowJet.phi(j), max(h) + base[index[0]] + 1, pT_label, horizontalalignment='center')
         
         plt.show(block = False)
     
         pythia.event.list()
+        print "radius: ", radius
+        print "pTjetMin: ", pTjetMin
         print "jets found: ", slowJet.sizeJet()
         if trento:
             print "trento multiplicity: ", mult[i]
