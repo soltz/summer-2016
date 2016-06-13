@@ -1,0 +1,139 @@
+\documentclass[11pt]{article}
+\pagestyle{myheadings}
+\markright{Pythia-Trento Jet Study and Date - \today}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{pdfpages}
+\usepackage[nottoc,numbib]{tocbibind} %inserts References in table of contents
+\usepackage[sort&compress]{natbib}
+%
+\textwidth 7.0in
+\textheight 9in
+%\itemsep 0pt
+\parsep 1pt
+\parindent 0pt
+\parskip 3pt
+\hoffset -1.in
+\voffset -0.5in
+
+\begin{document}
+
+%
+% Useful command to condense itemize lists
+%
+\newcommand{\zapspace}{\topsep=1pt\partopsep=1pt\itemsep=1pt\parskip=2pt}
+
+\begin{center}
+{\Large \bf Pythia Jet Finding Study with Trento Backgrounds\\}
+Joseph Simpson and Ron Soltz
+\end{center}
+
+\begin{abstract}
+%
+% Ron writes here
+%
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+%
+% Ron writes this section
+%
+
+\subsection{Motivation}
+
+\subsection{Software Framework}
+
+\section{Running Pythia}
+%
+% Describe pythia settings, show lego plot of jet events, for QCD and QED
+% Show distribution of jet pT distributions for QCD and QED
+%
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Distribution of jet pT for QCD and QED processes.  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Pythia event display.  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\section{Adding Trento Backgrounds}
+%
+% Describe how Trento is run, list parameters.
+% Describe how we convert Trento output into particle number
+% Explain how we generate pT, eta, and phi.
+% Explain we add radial flow and elliptic flow from epsilon_2 variable.
+%
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Trento event display (no jets).  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\section{Working with SlowJet Finder}
+%
+% Describe SlowJet Finder algorithm and input parameters.
+% Show examples of SlowJet Finder on Pythia only.
+% Show example of SlowJet Finder on Pythia plus Trento.
+%
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Event display for Pythia with SlowJet Finder.  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Event display for Pythia+Trento with SlowJet Finder.  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Event display for Pythia+Trento with SlowJet Finder.  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\section{Studying Jets}
+%
+% Define formula for fragmentation function.
+% Explain methodology for tracing particles in 
+%
+
+\begin{figure}[h]
+\begin{center}
+%\includegraphics[width=0.6\textwidth]{filename}
+\label{fig_label}
+\caption{Fragmentation Function (Xi) distributions for true and reconstructed QCD and QED jets, with and without trento backgrounds.  Figure created with [put python command here]}
+\end{center}
+\end{figure}
+
+\appendix{Listing of Python Scripts}
+%
+% Provide descriptions for all python scripts, similar to README file.
+%
+
+\end{document}
