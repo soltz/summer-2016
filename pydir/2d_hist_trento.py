@@ -72,8 +72,6 @@ def main():
     
     T = 0.15 # temperature in GeV
     deta = 4
-    # set pion mass to 0.14 GeV
-    mpi = 0.14
     
     # rho_0 scaling parameter for radial flow
     # from Retiere and Lisa, PRC70.044907 (2004), table 2
@@ -93,7 +91,9 @@ def main():
         print "e2: ", e2[i]
         
         for j in range(mult[i]):
-            r1, r2, r3, r4 = np.random.random(4)
+            r1, r2, r3, r4, r5 = np.random.random(5)
+            while r5 > 0.99:
+                r5 = np.random.random(1)
     
             # pT = transverse momentum
             pT_r1 = T*(math.sqrt(-2*math.log(r1)))
@@ -106,9 +106,29 @@ def main():
     
             # rho = normalized radial distance 
             rho_r4 = r4**0.5
+
+            # particle selected randomly, mass in GeV
+            if r5 <= 0.11:
+                mass = 0.140 # pi+
+            if r5 > 0.11 and r5 <= 0.22:
+                mass = 0.140 # pi-
+            if r5 > 0.22 and r5 <= 0.33:
+                mass = 0.135 # pi0
+            if r5 > 0.33 and r5 <= 0.44:
+                mass = 0.494 # K+
+            if r5 > 0.44 and r5 <= 0.55:
+                mass = 0.494 # K-
+            if r5 > 0.55 and r5 <= 0.66:
+                mass = 0.938 # p
+            if r5 > 0.66 and r5 <= 0.77:
+                mass = 0.938 # pbar
+            if r5 > 0.77 and r5 <= 0.88:
+                mass = 0.940 # n
+            if r5 > 0.88 and r5 <= 0.99:
+                mass = 0.940 # nbar
     
             # calculate initial transverse rapidity (yT)
-            eT = (mpi*mpi+pT_r1*pT_r1)**0.5
+            eT = (mass*mass+pT_r1*pT_r1)**0.5
             yT = 0.5 * np.log((eT+pT_r1)/(eT-pT_r1))
             pT_initial = pT_r1
             yT_initial = yT
@@ -118,7 +138,7 @@ def main():
             yT = yT_initial + yBoost
     
             # convert back to pT
-            pT_wflow = mpi*np.cosh(yT)
+            pT_wflow = mass*np.cosh(yT)
     
             pT.append(pT_wflow)
             phi.append(phi_r2)
@@ -137,8 +157,8 @@ def main():
     
     #   Create an array of colors to color the bars
         bar_colors = []
-        for i in range(len(h)):
-            if h[i] == 0:
+        for j in range(len(h)):
+            if h[j] == 0:
                 bar_colors.append('w')
             else:
                 bar_colors.append('b')
@@ -154,8 +174,10 @@ def main():
         ax.set_xlabel('\n$\eta$',fontsize=20)
         ax.set_ylabel('\n$\phi$',fontsize=20)
         ax.set_zlabel('pT')
-    
-        plt.title('trento background')
+        
+        title = 'trento data: multiplicity = ' + str(mult[i])
+        plt.title(title)
+        
         pi = np.pi
         plt.ylim(-pi,pi)
     
@@ -168,6 +190,7 @@ def main():
             query = raw_input("name this png file (do not include extension .png): ")
             filename = query + '.png'
             plt.savefig(filename)
+            print 'file saved as', filename
             query = raw_input("q to quit, <CR> to continue: ")
             if (query=='q'):
                 break

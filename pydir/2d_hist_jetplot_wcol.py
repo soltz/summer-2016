@@ -13,6 +13,7 @@ def usage():
     print 'Plots a 2d histogram for pythia p-p events and identifies jets as red with slowJet.'
     print 'Usage: python 2d_hist_jetplot_wcol.py [options]'
     print '   -h, --help      : this message'
+    print '   -o, --col     : create plot without colored jets and labels'
     print '   -e, --eCM     = beam center-of-mass energy (GeV) [200.0]'
     print '   -n, --pTHatMin     = minimum jet pT [20.0]'
     print '   -m, --pTHatMax     = maximum jet pT [25.0]'
@@ -27,8 +28,8 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'he:n:m:s:cqp:r:b:', \
-              ['help','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'hoe:n:m:s:cqp:r:b:', \
+              ['help','col','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -43,6 +44,7 @@ def main():
     QED = 'off'
 
     # slowJet settings
+    col = 'on'
     radius = 0.7
     pTjetMin = 10.
 
@@ -52,6 +54,8 @@ def main():
         if o in ('-h', '--help'):
             usage()
             sys.exit()
+        elif o in ('-o', '--col'):
+            col = 'off'
         elif o in ('-e', '--eCM'):
             eCM = float(a)
         elif o in ('-n', '--pTHatMin'):
@@ -187,19 +191,34 @@ def main():
 
 #   Create an array of colors where bars associated with jet particles are red
 #   Background bars are blue and bars with no value are white
-        jet_colors=[]
-        for i in h[0:tot_bins]:
-            if i > 0:
-                jet_colors.append('b')
-            else:
-                jet_colors.append('w')
-        for i in range(len(jet_h)):
-            if jet_h[i] > 0:
-                jet_colors.append('r')
-            elif h[i] > 0:
-                jet_colors.append('b')
-            else:
-                jet_colors.append('w')
+        if col == 'on':
+            jet_colors = []
+            for i in h[0:tot_bins]:
+                if i > 0:
+                    jet_colors.append('b')
+                else:
+                    jet_colors.append('w')
+            for i in range(len(jet_h)):
+                if jet_h[i] > 0:
+                    jet_colors.append('r')
+                elif h[i] > 0:
+                    jet_colors.append('b')
+                else:
+                    jet_colors.append('w')
+        else:
+            jet_colors = []
+            for i in h[0:tot_bins]:
+                if i > 0:
+                    jet_colors.append('b')
+                else:
+                    jet_colors.append('w')
+            for i in range(len(jet_h)):
+                if jet_h[i] > 0:
+                    jet_colors.append('b')
+                elif h[i] > 0:
+                    jet_colors.append('b')
+                else:
+                    jet_colors.append('w')
 
 #   End of event loop. Statistics. Histogram. Done.
         pythia.stat();
@@ -221,10 +240,12 @@ def main():
         pythia.settings.listChanged()
         pythia.settings.list("Random:seed")
 
-        for i in range(slowJet.sizeJet()):
-            pT_jet = slowJet.pT(i)
-            pT_label = 'slowJet pT = %.2f' % pT_jet
-            ax.text(slowJet.y(i),slowJet.phi(i),max(h)+1,pT_label,horizontalalignment='center')
+        if col == 'on':
+            for i in range(slowJet.sizeJet()):
+                pT_jet = slowJet.pT(i)
+                pT_label = 'slowJet pT = %.2f' % pT_jet
+                ax.text(slowJet.y(i),slowJet.phi(i),max(h)+1,pT_label,horizontalalignment='center')
+            
         plt.show(block=False)
 
         query = raw_input("q to quit, p to save to png,  <CR> to continue: ")
