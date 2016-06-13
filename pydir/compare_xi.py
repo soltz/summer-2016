@@ -7,8 +7,8 @@ import pythia8
 import getopt, sys
 
 def usage():
-    print 'Shows the frequency of reconstructed jet xi values when the pT of pythia events is restricted to 20-25 GeV/c.'
-    print 'Usage: python xi_reconstructed_jets.py [options]'
+    print 'Compares xi for true and reconstructed jets when trento is on/off and for QED/QCD events, four plots generated'
+    print 'Usage: python compare_xi.py [options]'
     print '   -h, --help      : this message'
     print '   -f, --file     = set trento data file [AuAu_200GeV_100k.txt]'
     print '   -e, --eCM     = pythia beam center-of-mass energy (GeV) [200.0]'
@@ -30,18 +30,20 @@ def main():
         usage()
         sys.exit(2)
 
+    # default trento file
     trento_file = 'AuAu_200GeV_100k.txt'
     
-    # pythia settings
+    # default pythia settings
     eCM  = 200.0
     pTHatMin  = 20.0
     pTHatMax  = 25.0
     seed  = -1
     num_events = 1000
 
-    # slowJet settings
+    # default slowJet setting
     pTjetMin = 15
 
+    # default number of histogram bins
     bins = 30
 
     for o, a in opts:
@@ -67,8 +69,9 @@ def main():
         else:
             assert False, 'unhandled option'
 
-
+    # parameters is a list used to run the settings needed to create the four separated plots
     parameters = [[False,'off','on',221],[True,'off','on',222],[False,'on','off',223],[True,'on','off',224]]
+
     for settings in parameters:
         trento = settings[0]
         QCD = settings[1]
@@ -143,12 +146,14 @@ def main():
         xi_r2 = []
         xi_r3 = []
         xi_true = []
-        
+
+        # begin looping through pythia events
         for i in range(num_events):
         
             pythia.event.reset()
             pythia.next()
-    
+
+            # the daughters of the initial hard process are recorded below
             daughters5 = []
             daughters5.extend(pythia.event[5].daughterList())
             for j in daughters5:
@@ -160,7 +165,8 @@ def main():
             for j in daughters6:
                if j != 0:
                    daughters6.extend(pythia.event[j].daughterList())
-    
+
+            # a value of xi is calculated for each particle within each pythia jet
             for j in range(pythia.event.size()):
                 prt = pythia.event[j]
                 if prt.isFinal():
@@ -193,7 +199,8 @@ def main():
                         if z > 0:
                             prt_xi = math.log((jet_px**2 + jet_py**2 + jet_pz**2)/(prt_px*jet_px + prt_py*jet_py + prt_pz*jet_pz))
                             xi_true.append(prt_xi)
-            
+
+            # if trento is on then trento particles are created and added to the pythia data
             if trento:
                 for j in range(mult[i]):
                     r1, r2, r3, r4, r5 = np.random.random(5)
@@ -261,7 +268,7 @@ def main():
                     E = (pT_wflow**2 + pz**2 + mass**2)**0.5
                     pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
                 
-            # Find xi values for slowJet radius 0.3
+            # Initialize slowJet for radius 0.3
             slowJet = pythia8.SlowJet( -1, 0.3, pTjetMin, etaMax, nSel, 1)
             slowJet.analyze(pythia.event)
             jets_found = slowJet.sizeJet()
@@ -271,6 +278,7 @@ def main():
             for j in range(jets_found):
                 slowJetPrtList[j] = list(slowJet.constituents(j))
     
+            # Calculate xi for reconstructed jets
             for j in range(pythia.event.size()):
                 prt = pythia.event[j]
                 if prt.isFinal():
@@ -297,7 +305,7 @@ def main():
                                 prt_xi = math.log(z)
                                 xi_r1.append(prt_xi)
     
-            # Find xi values for slowJet radius 0.5
+            # Initialize slowJet for radius 0.5
             slowJet = pythia8.SlowJet( -1, 0.5, pTjetMin, etaMax, nSel, 1)
             slowJet.analyze(pythia.event)
             jets_found = slowJet.sizeJet()
@@ -306,7 +314,8 @@ def main():
             slowJetPrtList = [[] for j in range(jets_found)]
             for j in range(jets_found):
                 slowJetPrtList[j] = list(slowJet.constituents(j))
-    
+                
+            # Calculate xi for reconstructed jets
             for j in range(pythia.event.size()):
                 prt = pythia.event[j]
                 if prt.isFinal():
@@ -333,7 +342,7 @@ def main():
                                 prt_xi = math.log(z)
                                 xi_r2.append(prt_xi)
     
-            # Find xi values for slowJet radius 0.7
+            # Initialize slowJet for radius 0.7
             slowJet = pythia8.SlowJet( -1, 0.7, pTjetMin, etaMax, nSel, 1)
             slowJet.analyze(pythia.event)
             jets_found = slowJet.sizeJet()
@@ -342,7 +351,8 @@ def main():
             slowJetPrtList = [[] for j in range(jets_found)]
             for j in range(jets_found):
                 slowJetPrtList[j] = list(slowJet.constituents(j))
-    
+                
+            # Calculate xi for reconstructed jets
             for j in range(pythia.event.size()):
                 prt = pythia.event[j]
                 if prt.isFinal():
@@ -381,7 +391,8 @@ def main():
     
         z,binEdges = np.histogram(xi_r3,bins=bins) 
         zbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
-    
+        
+        # create plot with title and legend
         plt.subplot(subplot)
         plt.plot(wbincenters, w, 'o', label = 'true xi')
         plt.plot(xbincenters, x, '^', label = 'xi, r = 0.3')
@@ -392,25 +403,27 @@ def main():
         plt.ylabel('counts')
         plt.xlim(0,10)
         
-        title = 'Values of xi for reconstructed jets and true jets: trento '
-        if trento:
-            title = title + 'on'
-        else:
-            title = title + 'off'
-        if QCD == 'on':
-            title = title + ', QCD on'
-        if QED == 'on':
-            title = title + ', QED on'
+        title = 'Values of xi for reconstructed jets and true jets'
         plt.title(title)
-        
-        plt.legend(loc=0)
+
+        if trento:
+            if QCD == 'on':
+                legend_title = 'QCD, trento on'
+            if QED == 'on':
+                legend_title = 'QED, trento on'
+        else:
+            if QCD == 'on':
+                legend_title = 'QCD, trento off'
+            if QED == 'on':
+                legend_title = 'QED, trento off'
+        plt.legend(loc=0, title = legend_title)
 
     plt.show(block = False)
 
-    query = raw_input("<CR> to continue, p to save to png: ")
+    query = raw_input("<CR> to continue, p to save to pdf: ")
     if (query=='p'):
-        query = raw_input("name this png file (do not include extension .png): ")
-        filename = query + '.png'
+        query = raw_input("name this pdf file (do not include extension .pdf): ")
+        filename = query + '.pdf'
         plt.savefig(filename)
         print 'file saved'
         query = raw_input("<CR> to continue: ")
