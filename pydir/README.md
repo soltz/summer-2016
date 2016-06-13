@@ -82,8 +82,14 @@ xi_reconstructed_jets.py
  -command line options shown with -h
 
 xi_true_jets.py
- -test program that creates a histogram of xi values for pythia jets
- -program is incomplete
+ -creates a histogram of xi values for pythia QED jets
+ -also creates a separate plot showing values of z
+ -negative z values cause a domain error in the calculation of xi
+
+compare_xi.py
+ -creates four separate subplots comparing xi for true jets to xi for reconstructed jets
+ -plots are created for trento data on/off and QCD/QED
+ -different values of slowJet radius are shown for each plot
 
 trento_in_python.py
  -creates plots with trento data for the following:
