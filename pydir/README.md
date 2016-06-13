@@ -11,8 +11,8 @@
 addflow.py
  -example program showing how to add flow to the background particles produced from trento data
 
-pT_QEDevents.py
- -creates a histogram showing the frequency of different measurements of pT for pythia QED processes 
+pT_pythiaEvents.py
+ -creates a histogram for pT of pythia QED/QCD hard processes 
 
 slowJetpT_vs_pTHatQED.py
  -compares the jet pT produced by pythia QED events to the calculated jet pT found by slowJet
