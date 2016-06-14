@@ -50,9 +50,12 @@ Joseph Simpson and Ron Soltz
 
 \section{Running Pythia}
 %
-% Describe pythia settings, show lego plot of jet events, for QCD and QED
-% Show distribution of jet pT distributions for QCD and QED
+%Describe pythia settings, show lego plot of jet events, for QCD and QED
+%Show distribution of jet pT distributions for QCD and QED
 %
+Pythia allows users to set beam CM energy (eCM). By default Pythia sets eCM to 14 TeV, the default for all our programs is 200 GeV .  Initial QCD or QED hard scattering processes may be turned on or off. Pythia also allows restrictions to be set on the transverse momentum produced by hard scattering (pTHat or jet pT). For our programs the jet pT range is typically 20-25 GeV.
+Figure 1 shows the distribution of jet pT for both various QCD and various QED processes restricted to the range of 20-50 GeV. The upper histogram of figure 1 shows the four most common QCD hard processes produced by Pythia. There are also other hard processes, such as those that involve heavy quarks, but they occur so infrequently that they are not included. The lower histogram shows all five of the QED hard processes, however only two of the processes occur frequently.
+Figure 2 shows two lego plots, one for a QCD event and one for a QED event. These plots demonstrate how our programs are able to display each Pythia event. Each particle that is produced from a Pythia event is binned in a 2 dimensional histogram depending on its pseudorapidity (eta) and azimuthal angle (phi). The histogram bins are weighted by transverse energy (eT). In both plots in figure 2 it is easy to identify the jets produced by the Pythia events.
 
 \begin{figure}[h]
 \begin{center}
@@ -65,9 +68,9 @@ Joseph Simpson and Ron Soltz
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=0.49\textwidth]{2d_hist_jetplot.png}
-\includegraphics[width=0.49\textwidth]{2d_hist_jetplot.png}
+\includegraphics[width=0.49\textwidth]{2d_hist_jetplot2.png}
 \label{fig_label}
-\caption{Pythia event display.  Figure created with [python 2d\_hist\_jetplot\_wcol.py -o -b 30]}
+\caption{Pythia event display for a QCD event, shown to the left, and a QED event shown to the right.  Left figure created with [python 2d\_hist\_jetplot\_wcol.py -o -b 30]. Right figure created with [python 2d\_hist\_jetplot\_wcol.py -o -c -q -b 30]}
 \end{center}
 \end{figure}
 
@@ -78,6 +81,7 @@ Joseph Simpson and Ron Soltz
 % Explain how we generate pT, eta, and phi.
 % Explain we add radial flow and elliptic flow from epsilon_2 variable.
 %
+
 
 \begin{figure}[h]
 \begin{center}
