@@ -96,6 +96,8 @@ def main():
                 r5 = np.random.random(1)
     
             # pT = transverse momentum
+            # we use the standard equation to sample from a Gaussian deviate,
+            # which is equivalent to a thermal Boltzmann distribution
             pT_r1 = T*(math.sqrt(-2*math.log(r1)))
     
             # phi = azimuthal angle
