@@ -61,7 +61,7 @@ Figure 2 shows two lego plots, one for a QCD event and one for a QED event. Thes
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{pT_pythiaEvents.pdf}
+\includegraphics[width=0.8\textwidth]{pT_pythiaEvents.pdf}
 \label{fig_label}
 \caption{Distribution of jet pT for QCD and QED processes.  Figure created with [python pT\_pythiaEvents.py -m 20000]}
 \end{center}
@@ -87,11 +87,11 @@ Figure 2 shows two lego plots, one for a QCD event and one for a QED event. Thes
 
 To use the \trento\ data as we intended we had to produce accurate Au-Au multiplicities for the various beam energies. To do this we fit the \trento\ data to PHENIX data. We created a histogram for the number of participants in each \trento\ event and weighted the bins by the initial entropy. We then scaled the \trento\ data at each energy by a constant to fit it to the PHENIX data of charged multiplicity vs. number of participants. Using the constants from the fit at each energy allowed us to create multiplicity values from the initial entropy values.
 
-Using the \trento\ multiplicity values we now knew how many background particles to create for each \trento\ event. To generate values of transverse momentum (pT), pseudo-rapidity ($\eta$), and azimuthal angle ($\phi$) for each particle we used the NumPy random number generator. For $\phi$ we created a random number between -$\pi$ and $\pi$, for $\eta$ we created a random number between -2 and 2, and for pT we created a pT$^2$ exponential distribution.
+Using the \trento\ multiplicity values we now knew how many background particles to create for each \trento\ event. To generate values of transverse momentum (pT), pseudo-rapidity ($\eta$), and azimuthal angle ($\phi$) for each particle we used the numpy random number generator. For $\phi$  and $\eta$ we created flat distributions between -$\pi$ to $\pi$ and -2 to 2, and for pT we sampled from a Gaussian deviate, which is equivalent to a thermal Boltzmann distribution. We also included radial and elliptic flow into our background distributions by using the $\epsilon_2$ variable from the \trento\ data. First we calculated the initial transverse rapidity (yT) and then applied flow as an additive boost. The scaling parameter for radial flow ($\rho_0$) that we used was 0.85 from Retiere and Lisa, PRC70.044907 (2004), table 2.  The scaling parameter for elliptic flow ($\rho_2$) was 0.15 from Alver and Roland, PRC81,054905 (2010), fig 4. Again using the numpy random number generator we created a normalized radial distance ($\rho$). After applying flow, yT was converted back to pT. The mass used for these calculations was chosen randomly from one of nine different particles that were included in the produced background. These particles consisted of pions, kaons, protons, and neutrons, as well as the anti particle counterparts. Figure 3 shows the background display produced from a \trento\ event. Again each particle that is produced is binned in a 2 dimensional histogram depending on its pseudo-rapidity ($\eta$) and azimuthal angle ($\phi$). For this plot the histogram bins are weighted by pT. There are no jets produced within the \trento\ background.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{2d_hist_trento.png}
+\includegraphics[width=0.8\textwidth]{2d_hist_trento.png}
 \label{fig_label}
 \caption{Trento event display (no jets).  Figure created with [python 2d\_hist\_trento.py -b 30]}
 \end{center}
@@ -103,28 +103,31 @@ Using the \trento\ multiplicity values we now knew how many background particles
 % Show examples of SlowJet Finder on Pythia only.
 % Show example of SlowJet Finder on Pythia plus Trento.
 %
+The SlowJet jet finder takes several input parameters that affect how it searches for jets. These parameters are power, radius, minimum jet pT (pTjetMin), etaMax, select, and mass set. Power determines which jet finding algorithm to use. For our programs we set power to -1, this corresponds to the anti-kT algorithm. Other possible algorithms for SlowJet are the Cambridge/Aachen algorithm and the kT algorithm. Radius is crudely related to the radius of the jet cone in (y,$\phi$) space. In most of our programs radius is set to 0.7 by default. pTjetMin is the minimum pT that a cluster must have to become a jet. etaMax is the maximum +/- pseudo-rapidity that the detector is assumed to cover. For our programs etaMax is always set to 2. Select determines which particles are analyzed by SlowJet. For our programs select is always set to 2 which corresponds to all observable final-state particles. Mass set determines the masses assumed for the particles analyzed by SlowJet. There are three mass set options: 0 for all massless, 1 for photons are massless while all others are assigned the mass of charged pions, and 2 for all given their correct masses. For our programs mass set is set to either 1 or 2.
+
+Figures 4, 5, and 6 demonstrate how well SlowJet is able to function in Pythia events with varying amounts of heavy ion background. All three figures use the same familiar event display that was shown in figures 2 and 3 and use the standard SlowJet settings discussed above. In these three figures the color scheme is that Pythia particles that are identified as jets are colored red while all other Pythia particles are colored blue, \trento\ particles that are identified as jets are colored yellow while other \trento\ particles are colored sky blue. Figure 4 is a Pythia event with no heavy ion background. In this case SlowJet correctly identifies both jets. Figure 5 is a greater test for SlowJet because now a low multiplicity \trento\ background is introduced. In this event SlowJet is still able to correctly identify the two jets, however a few background particles, shown in yellow, are also lumped in with the jets. Figure 6, which now includes a high multiplicity heavy ion background, shows how SlowJet can become confused. In this case there are many \trento\ particles identified as jets, these are shown in yellow. The true jets become lost in the background and SlowJet fails.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{2d_hist_jetplot_wcol.png}
+\includegraphics[width=0.8\textwidth]{2d_hist_jetplot_wcol.png}
 \label{fig_label}
-\caption{Event display for Pythia with SlowJet Finder.  Figure created with [python 2d\_hist\_jetplot\_wcol.py -b 30]}
+\caption{Event display for Pythia with SlowJet Finder, no heavy ion background.  Particles identified as being a part of a jet are colored red, all other particles are colored blue. Figure created with [python 2d\_hist\_jetplot\_wcol.py -b 30]}
 \end{center}
 \end{figure}
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{pythia_slowjet_trento_hist1.png}
+\includegraphics[width=0.8\textwidth]{pythia_slowjet_trento_hist1.png}
 \label{fig_label}
-\caption{Event display for Pythia+Trento with SlowJet Finder.  Figure created with [python pythia\_slowjet\_trento\_hist.py -b 30 -s 1]}
+\caption{Event display for Pythia+Trento with SlowJet Finder, low multiplicity heavy ion background. The color scheme is that Pythia particles that are identified as jets are colored red, other Pythia particles are colored blue, \trento\ particles that are identified as jets are colored yellow, and other \trento\ particles are colored sky blue. Figure created with [python pythia\_slowjet\_trento\_hist.py -b 30 -s 1]}
 \end{center}
 \end{figure}
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{pythia_slowjet_trento_hist2.png}
+\includegraphics[width=0.8\textwidth]{pythia_slowjet_trento_hist2.png}
 \label{fig_label}
-\caption{Event display for Pythia+Trento with SlowJet Finder.  Figure created with [python pythia\_slowjet\_trento\_hist.py -b 30 -s 1]}
+\caption{Event display for Pythia+Trento with SlowJet Finder, high multiplicity heavy ion background.  The color scheme is that Pythia particles that are identified as jets are colored red, other Pythia particles are colored blue, \trento\ particles that are identified as jets are colored yellow, and other \trento\ particles are colored sky blue. Figure created with [python pythia\_slowjet\_trento\_hist.py -b 30 -s 1]}
 \end{center}
 \end{figure}
 
