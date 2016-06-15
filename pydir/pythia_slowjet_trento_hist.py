@@ -22,13 +22,14 @@ def usage():
     print '   -p, --pTjetMin     = minimum slowJet pT [15]'
     print '   -r, --radius     = slowJet radius [0.7]'
     print '   -b, --bins     = number of histogram bins on each axis [20]'
+    print '   -l, --labels     : turn color labels off'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htof:e:n:x:s:cqp:r:b:', \
-              ['help','trento','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'htof:e:n:x:s:cqp:r:b:l', \
+              ['help','trento','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins=','labels'])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -50,7 +51,9 @@ def main():
     pTjetMin = 15
     radius = 0.7
 
+    # plot settings
     bins = 20
+    labels = True
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -80,6 +83,8 @@ def main():
             radius = float(a)
         elif o in ('-b', '--bins'):
             bins = int(a)
+        elif o in ('-l', '--labels'):
+            labels = False
         else:
             assert False, 'unhandled option'
             
@@ -472,7 +477,13 @@ def main():
                     pT_jet = slowJet.pT(j)
                     pT_label = 'slowJet pT = %.2f' % pT_jet
                     ax.text(slowJet.y(j), slowJet.phi(j), max(h) + base[index[0]] + 1, pT_label, horizontalalignment='center')
-        
+
+        if labels:
+            skyblue_proxy = plt.Rectangle((0, 0), 1, 1, fc="skyblue")
+            blue_proxy = plt.Rectangle((0, 0), 1, 1, fc="b")
+            yellow_proxy = plt.Rectangle((0, 0), 1, 1, fc="y")
+            red_proxy = plt.Rectangle((0, 0), 1, 1, fc="r")
+            ax.legend([red_proxy,yellow_proxy,blue_proxy,skyblue_proxy],['Pythia jets','Trento jets','Pythia bg','Trento bg'])
         plt.show(block = False)
     
         pythia.event.list()

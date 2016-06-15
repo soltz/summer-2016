@@ -13,7 +13,6 @@ def usage():
     print 'Plots a 2d histogram for pythia p-p events and identifies jets as red with slowJet.'
     print 'Usage: python 2d_hist_jetplot_wcol.py [options]'
     print '   -h, --help      : this message'
-    print '   -o, --col     : create plot without colored jets and labels'
     print '   -e, --eCM     = beam center-of-mass energy (GeV) [200.0]'
     print '   -n, --pTHatMin     = minimum jet pT [20.0]'
     print '   -m, --pTHatMax     = maximum jet pT [25.0]'
@@ -23,13 +22,14 @@ def usage():
     print '   -p, --pTjetMin     = minimum slowJet pT [10]'
     print '   -r, --radius     = slowJet radius [0.7]'
     print '   -b, --bins     = number of histogram bins on each axis [20]'
+    print '   -l, --labels     : turn off color labels on plot'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hoe:n:m:s:cqp:r:b:', \
-              ['help','col','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'he:n:m:s:cqp:r:b:l', \
+              ['help','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins=','labels'])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -44,18 +44,17 @@ def main():
     QED = 'off'
 
     # slowJet settings
-    col = 'on'
     radius = 0.7
     pTjetMin = 10.
 
+    # plot settings
     bins = 20
+    labels = True
 
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
             sys.exit()
-        elif o in ('-o', '--col'):
-            col = 'off'
         elif o in ('-e', '--eCM'):
             eCM = float(a)
         elif o in ('-n', '--pTHatMin'):
@@ -74,6 +73,8 @@ def main():
             radius = float(a)
         elif o in ('-b', '--bins'):
             bins = int(a)
+        elif o in ('-l', '--labels'):
+            labels = False
         else:
             assert False, 'unhandled option'
 
@@ -327,7 +328,13 @@ def main():
             pT_jet = slowJet.pT(i)
             pT_label = 'slowJet pT = %.2f' % pT_jet
             ax.text(slowJet.y(i),slowJet.phi(i),max(h)+1,pT_label,horizontalalignment='center')
-            
+
+        if labels:
+            blue_proxy = plt.Rectangle((0, 0), 1, 1, fc="b")
+            red_proxy = plt.Rectangle((0, 0), 1, 1, fc="r")
+            yellow_proxy = plt.Rectangle((0, 0), 1, 1, fc="y")
+            green_proxy = plt.Rectangle((0, 0), 1, 1, fc="g")
+            ax.legend([green_proxy,yellow_proxy,red_proxy,blue_proxy],['true jets','false jets','missed jets','background'])   
         plt.show(block=False)
 
         query = raw_input("q to quit, p to save to png,  <CR> to continue: ")

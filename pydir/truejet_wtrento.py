@@ -11,6 +11,7 @@ def usage():
     print 'Usage: python restricted_jetpT.py [options]'
     print '   -h, --help      : this message'
     print '   -t, --trento     : turn trento background off'
+    print '   -d, --trentoseed     = change first trento event that is viewed[0]'
     print '   -o, --pythia     : turn pythia events off'
     print '   -f, --file     = set trento data file [AuAu_200GeV_100k.txt]'
     print '   -e, --eCM     = pythia beam center-of-mass energy (GeV) [200.0]'
@@ -22,19 +23,21 @@ def usage():
     print '   -p, --pTjetMin     = minimum slowJet pT [15]'
     print '   -r, --radius     = slowJet radius [0.7]'
     print '   -b, --bins     = number of histogram bins on each axis [20]'
+    print '   -l, --labels     : turn plot color labels off'
 
 def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htof:e:n:x:s:cqp:r:b:', \
-              ['help','trento','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'htd:of:e:n:x:s:cqp:r:b:l', \
+              ['help','trento','trentoseed=','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins=','labels'])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
         sys.exit(2)
 
     trento = True
+    trento_seed = 0
     pythia_on = True
     trento_file = 'AuAu_200GeV_100k.txt'
     
@@ -50,7 +53,9 @@ def main():
     pTjetMin = 15
     radius = 0.7
 
+    # plot settings
     bins = 20
+    labels = True
 
     for o, a in opts:
         if o in ('-h', '--help'):
@@ -58,6 +63,8 @@ def main():
             sys.exit()
         elif o in ('-t', '--trento'):
             trento = False
+        elif o in ('-d', '--trentoseed'):
+            trento_seed = int(a)
         elif o in ('-o', '--pythia'):
             pythia_on = False
         elif o in ('-f', '--file'):
@@ -80,6 +87,8 @@ def main():
             radius = float(a)
         elif o in ('-b', '--bins'):
             bins = int(a)
+        elif o in ('-l', '--labels'):
+            labels = False
         else:
             assert False, 'unhandled option'
             
@@ -165,7 +174,7 @@ def main():
     massSet = 2
     slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
     
-    for i in range(100000): 
+    for i in range(trento_seed,100000): 
     
         pT = []
         phi = []
@@ -471,11 +480,12 @@ def main():
                     pT_label = 'slowJet pT = %.2f' % pT_jet
                     ax.text(slowJet.y(j), slowJet.phi(j), max(h) + base[index[0]] + 1, pT_label, horizontalalignment='center')
 
-        blue_proxy = plt.Rectangle((0, 0), 1, 1, fc="b")
-        red_proxy = plt.Rectangle((0, 0), 1, 1, fc="r")
-        yellow_proxy = plt.Rectangle((0, 0), 1, 1, fc="y")
-        green_proxy = plt.Rectangle((0, 0), 1, 1, fc="g")
-        ax.legend([green_proxy,yellow_proxy,red_proxy,blue_proxy],['true jets','false jets','missed jets','background'])
+        if labels:
+            blue_proxy = plt.Rectangle((0, 0), 1, 1, fc="b")
+            red_proxy = plt.Rectangle((0, 0), 1, 1, fc="r")
+            yellow_proxy = plt.Rectangle((0, 0), 1, 1, fc="y")
+            green_proxy = plt.Rectangle((0, 0), 1, 1, fc="g")
+            ax.legend([green_proxy,yellow_proxy,red_proxy,blue_proxy],['true jets','false jets','missed jets','background'])
         plt.show(block = False)
     
         pythia.event.list()
