@@ -460,7 +460,7 @@ def main():
             title = '\nslowJet in trento background without pythia' + '\ntrento multiplicity = ' + str(mult[i])
         if not trento:
             title = 'slowJet in pythia without trento background'
-        plt.title(title)
+        plt.title(title, loc = 'left')
         
         pi = np.pi
         plt.ylim(-pi,pi)

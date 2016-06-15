@@ -66,30 +66,22 @@ nCh_QED.py
  -creates a histogram showing the frequency of different charged multiplicities for pythia QED processes
 
 phi_pT_eta_trento.py
- -using multiplicities from trento data, randomly creates values for phi, pT, and eta
+ -Plots the values of phi, pT, and eta that are created for the trento backgrounds
 
 restricted_jetpT.py
- -pythia pTHat is restricted between the values of 20-25 GeV/c
- -a histogram is produced showing the frequency of calculated jet pT from slowJet
- -different values of radius for slowJet initialization are shown
+ -Tests various values of SlowJet radius while the Pythia jets are in a restricted pT range
 
 Npart_bins.py
- -creates a histogram for trento data showing Npart vs multiplicity
+ - Plots initial entropy (mult) vs. number of participants (Npart) for trento data
 
 nCh_mult_events.py
  -creates a histogram showing the frequency of different charged multiplicities for pythia QCD processes
-
-pythia_pTjet.py
- -creates a histogram showing the frequency of different measurements of pT for pythia QCD processes
 
 scanPythia.py
  -prints slowJet information about pythia events such as jet constituents and jet pT
 
 optimize_slowjet.py
  -creates a 2d histogram showing how many jets slowJet finds for different values of radius and pTjetMin
-
-pythia_pyplot.py
- -creates a histogram showing the frequency of different charged multiplicities for Pythia events
 
 slowJetpT_vs_pTHat.py
  -compares the jet pT produced by pythia QCD events to the calculated jet pT found by slowJet

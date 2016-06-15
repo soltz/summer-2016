@@ -320,7 +320,7 @@ def main():
 
         event_type = pythia.info.name()
         title = 'hard process: %s (pTHat = %.2f)' % (event_type, pythia.info.pTHat())
-        plt.title(title)
+        plt.title(title, loc = 'left')
         pi = np.pi
         plt.ylim(-pi,pi)
 

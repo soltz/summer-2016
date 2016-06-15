@@ -108,25 +108,25 @@ The scaling parameter for radial flow ($\rho_0$) that we used was 0.85 from Reti
 %
 The SlowJet jet finder takes several input parameters that affect how it searches for jets. These parameters are power, radius, minimum jet $p_T$ ($p_TjetMin$), $etaMax$, select, and $massSet$. Power determines which jet finding algorithm to use. For our programs we set power to -1, this corresponds to the {\it anti-k$T$} algorithm. Other possible algorithms for SlowJet are the Cambridge/Aachen algorithm and the $kT$ algorithm. Radius is crudely related to the radius of the jet cone in ($y$,$\phi$) space. In most of our programs radius is set to 0.7 by default. $p_TjetMin$ is the minimum $p_T$ that a cluster must have to become a jet. Our values for $p_TjetMin$ are normally set to 10 or 15 GeV. $etaMax$ is the maximum +/- pseudo-rapidity that the detector is assumed to cover. For our programs $etaMax$ is always set to 2. Select determines which particles are analyzed by SlowJet. For our programs select is always set to 2 which corresponds to all observable final-state particles. $massSet$ determines the masses assumed for the particles analyzed by SlowJet. There are three $massSet$ options: 0 for all massless, 1 for photons are massless while all others are assigned the mass of charged pions, and 2 for all given their correct masses. For our programs $massSet$ is set to either 1 or 2. Radius and $p_TjetMin$ are the parameters that are most often changed while we examine jets.
 
-Figures 4 and 5 demonstrate how well SlowJet is able to function in Pythia events with varying amounts of heavy ion background. Both figures use the same familiar event display that was shown in figures 2 and 3 and use the standard SlowJet settings discussed above. In these figures the color scheme is that Pythia particles that are identified as jets are colored red while all other Pythia particles are colored blue, and \trento\ particles that are identified as jets are colored yellow while other \trento\ particles are colored sky blue. Figure 4 shows two Pythia events with no heavy ion background. In the event shown on the left SlowJet correctly identifies both jets. However, in the event on the right, the second jet is too diffuse and SlowJet does not identify it as a jet. Figure 5 is a greater test for SlowJet because now a \trento\ background is introduced. In the low \trento\ multiplicity event, SlowJet is still able to correctly identify the two jets, however a few background particles, shown in yellow, are also lumped in with the jets.  In the high \trento\ multiplicity event SlowJet becomes confused. In this case there are many \trento\ particles identified as jets, those shown in yellow. The true jets become lost in the background and SlowJet fails.
+Figures 4 and 5 demonstrate how well SlowJet is able to function in Pythia events with varying amounts of heavy ion background. Both figures use the same familiar event display that was shown in figures 2 and 3 and use the standard SlowJet settings discussed above. In these figures the color scheme is that Pythia jets that are identified correctly by SlowJet are colored green, particles mistakenly identified as SlowJet jets is colored yellow,  Pythia jets that are missed by SlowJet are colored red, and all other background particles are colored blue. Figure 4 shows two Pythia events with no heavy ion background. In the event shown on the left SlowJet correctly identifies both jets. However, in the event on the right, the second jet is too diffuse and SlowJet does not identify it as a jet. Figure 5 is a greater test for SlowJet because now a \trento\ background is introduced. In the low \trento\ multiplicity event, SlowJet is still able to correctly identify the two jets, however a few background particles, shown in yellow, are also lumped in with the jets.  In the high \trento\ multiplicity event SlowJet becomes confused. In this case there are many \trento\ particles identified as jets, those shown in yellow. The true jets become lost in the background and SlowJet fails.
 
-All the bar plots in figures 4 and 5 are created in a way so that bars are stacked on top of each other if two different color bars share the same bin. The order in which the bars are stacked is that the sky blue bars corresponding to \trento\ background not mistaken as jets goes on the bottom. The dark blue bars associated with Pythia particles not identified as jets are stacked next. Then the yellow bars associated with \trento\ background mistakenly identified as jets are stacked. Pythia particles that are identified as jets, shown in red, are then stacked on the very top. This order of stacking the bars is the most useful when displaying very congested events because it is easy to see how SlowJet performed.
+All the bar plots in figures 4 and 5 are created in a way so that bars are stacked on top of each other if two different color bars share the same bin. The order in which the bars are stacked is that the blue bars corresponding to background not mistaken as jets goes on the bottom. The red bars associated with true jet particles not identified as jets are stacked next. Then the yellow bars associated with falsely identified jets are stacked. Correctly identified jets, shown in green, are then stacked on the very top. This order of stacking the bars is the most useful when displaying very congested events because it is easy to see how SlowJet performed.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{2d_hist_jetplot_wcol.png}
-\includegraphics[width=0.49\textwidth]{2d_hist_jetplot_wcol2.png}
+\includegraphics[width=0.49\textwidth]{2d_hist_truejet_wcol1.png}
+\includegraphics[width=0.49\textwidth]{2d_hist_truejet_wcol2.png}
 \label{fig_label}
-\caption{Event display for Pythia with SlowJet Finder, no heavy ion background.  SlowJet succeeds on the left but struggles on the right. Particles identified as being a part of a jet are colored red, all other particles are colored blue. Both plots created with [python 2d\_hist\_jetplot\_wcol.py -b 30]}
+\caption{Event display for Pythia with SlowJet Finder, no heavy ion background.  SlowJet succeeds on the left but struggles on the right. Both plots created with [python 2d\_hist\_truejet\_wcol.py]}
 \end{center}
 \end{figure}
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{pythia_slowjet_trento_hist1.png}
-\includegraphics[width=0.49\textwidth]{pythia_slowjet_trento_hist2.png}
+\includegraphics[width=0.49\textwidth]{truejet_wtrento1.png}
+\includegraphics[width=0.49\textwidth]{truejet_wtrento2.png}
 \label{fig_label}
-\caption{Event display for Pythia+Trento with SlowJet Finder. Low multiplicity \trento\ background shown to the left and high multiplicity \trento\ background shown to the right. Pythia particles that are identified as jets are colored red, other Pythia particles are colored blue, \trento\ particles that are identified as jets are colored yellow, and other \trento\ particles are colored sky blue. Both plots created with [python pythia\_slowjet\_trento\_hist.py -b 30 -s 1]}
+\caption{Event display for Pythia+Trento with SlowJet Finder. Low multiplicity \trento\ background shown to the left and high multiplicity \trento\ background shown to the right. Correctly identified jets are colored green, mistakenly identified jets are colored yellow, jets that SlowJet missed are colored red, and all background particles are colored blue. Both plots created with [python truejet\_wtrento.py]}
 \end{center}
 \end{figure}
 
@@ -153,10 +153,29 @@ In figure 6, $\xi$ is calculated for both QCD and QED events with no \trento\ da
 
 \section{Listing of Python Scripts}
 \begin{description}
-\item[python\_script\_1\_name] Describe first python script.
-\item[python\_script\_2\_name] Describe second python script.
-\item[python\_script\_3\_name] Describe third python script.
-
+\item[2d\_hist\_jetplot\_wcol.py] Displays Pythia events in ($\eta$,$\phi$) space, SlowJet jets are colored red
+\item[2d\_hist\_trento.py] Displays \trento\ backgrounds in ($\eta$,$\phi$) space
+\item[2d\_hist\_truejet\_wcol.py] Displays Pythia events in ($\eta$,$\phi$) space, SlowJet jets are compared to true jets
+\item[3d\_jetplot\_2016.py] Displays Pythia events in ($\eta$,$\phi$) space, particles shown individually, SlowJet jets are colored red
+\item[Npart\_bins.py] Plots initial entropy (mult) vs. number of participants (Npart) for \trento\ data
+\item[compare\_xi.py] Compares $\xi$ for true and reconstructed jets
+\item[nCh\_mult\_events.py] Shows the frequency of charged multiplicities for various Pythia QCD processes
+\item[nCh\_QED.py] Shows the frequency of charged multiplicities for various Pythia QED processes
+\item[phenix\_data.py] PHENIX data plotted with error bars for charged multiplicity vs. number of participants, Au-Au at various energies
+\item[phenix\_trento\_comp.py] Fits \trento\ data to PHENIX data for various Au-Au energies, charged multiplicity vs. number of participants
+\item[phi\_pT\_eta\_trento.py] Plots the values of $\phi$, $p_T$, and $\eta$ that are created for the \trento\ backgrounds
+\item[optimize\_slowjet.py] Creates a 2d histogram for SlowJet parameters radius and $p_TjetMin$ and shows average jets found for various values
+\item[pT\_pythiaEvents.py] Plots frequency of various QED/QCD Pythia hard processes
+\item[pythia\_slowjet\_trento\_hist.py] Displays Pythia events with \trento\ backgrounds in ($\eta$,$\phi$) space, bars are colored to show SlowJet performance
+\item[restricted\_jetpT.py] Tests various values of SlowJet radius while the Pythia jets are in a restricted $p_T$ range
+\item[scanPythia.py] Rrints SlowJet information about Pythia events such as jet constituents and jet $p_T$
+\item[slowJetpT\_vs\_pTHat.py] Compares the true jet $p_T$ produced by Pythia QCD events to the SlowJet jet $p_T$ 
+\item[slowJetpT\_vs\_pTHatQED.py] Compares the true jet $p_T$ produced by Pythia QED events to the SlowJet jet $p_T$
+\item[slowjet\_trento\_hist.py] Displays \trento\ background in ($\eta$,$\phi$) space, SlowJet identified jets are colored red
+\item[trento\_in\_python.py] Creates plots for \trento\ data, such as initial entropy vs. impact parameter and number of participants vs. impact parameter, as well as others
+\item[truejet\_wtrento.py] Displays Pythia events with \trento\ backgrounds in ($\eta$,$\phi$) space, SlowJet jets are compared to true jets
+\item[xi\_reconstructed\_jets.py] Creates a histogram of $\xi$ values for SlowJet jets
+\item[xi\_true\_jets.py] Creates a histogram of $\xi$ values for true jets
 \end{description}
 
 
