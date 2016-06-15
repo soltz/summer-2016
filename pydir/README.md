@@ -42,6 +42,9 @@ phenix_trento_comp.py
 pythia_slowjet_trento_hist.py
 -displays Pythia events with trento background. SlowJet is called and jets are colored
 
+truejet_wtrento.py
+-displays Pythia events with trento background. SlowJet is tested against true jets.
+
 xi_reconstructed_jets.py
  -creates a histogram of xi values for SlowJet jets
 
