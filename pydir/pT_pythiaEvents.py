@@ -10,9 +10,11 @@ import numpy as np
 import getopt, sys
 
 def usage():
-    print 'Shows the frequency of reconstructed jet xi values when the pT of pythia events is restricted to 20-25 GeV/c.'
+    print 'Histograms jet pT for various QED and QCD Pythia hard processes.'
     print 'Usage: python pT_pythiaEvents.py [options]'
     print '   -h, --help      : this message'
+    print '   -c, --QCD     : show only QCD processes'
+    print '   -q, --QED     : show only QED processes'
     print '   -e, --eCM     = pythia beam center-of-mass energy (GeV) [200.0]'
     print '   -n, --pTHatMin     = pythia minimum jet pT [20.0]'
     print '   -x, --pTHatMax     = pythia maximum jet pT [50.0]'
@@ -24,8 +26,8 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'he:n:x:s:m:b:', \
-              ['help','eCM=','pTHatMin=','pTHatMax=','seed=','num_events=','bins='])
+        opts, args = getopt.getopt(sys.argv[1:], 'hcqe:n:x:s:m:b:', \
+              ['help','QCD','QED','eCM=','pTHatMin=','pTHatMax=','seed=','num_events=','bins='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -38,6 +40,9 @@ def main():
     seed  = -1
     num_events = 1000
 
+    # QCD/QED
+    parameters = [['on','off',211],['off','on',212]]
+
     # histogram bins
     bins = 40
 
@@ -45,6 +50,10 @@ def main():
         if o in ('-h', '--help'):
             usage()
             sys.exit()
+        elif o in ('-c', '--QCD'):
+            parameters = [['on','off',111]]
+        elif o in ('-q', '--QED'):
+            parameters = [['off','on',111]]
         elif o in ('-e', '--eCM'):
             eCM = float(a)
         elif o in ('-n', '--pTHatMin'):
@@ -60,7 +69,6 @@ def main():
         else:
             assert False, 'unhandled option'
 
-    parameters = [['on','off',211],['off','on',212]]
     for setting in parameters:
         QCD = setting[0]
         QED = setting[1]
@@ -93,6 +101,11 @@ def main():
 
         set_pTHatMax = "PhaseSpace:pTHatMax = " + str(pTHatMax)
         pythia.readString(set_pTHatMax)
+
+        pythia.readString("Random:setseed = on")
+    
+        set_seed = "Random:seed = " + str(seed)
+        pythia.readString(set_seed)
         
         pythia.init()
         

@@ -11,9 +11,6 @@ addflow.py
 pT_pythiaEvents.py
  -creates a histogram for pT of pythia QED/QCD hard processes 
 
-slowJetpT_vs_pTHatQED.py
- -compares the jet pT produced by pythia QED events to the calculated jet pT found by slowJet
-
 2d_hist_trento.py
  -displays trento background with flow and scaled multiplicity to PHENIX data
 
@@ -62,9 +59,6 @@ trento_in_python.py
      -e2 vs. Npart
      -e3 vs. Npart
 
-nCh_QED.py
- -creates a histogram showing the frequency of different charged multiplicities for pythia QED processes
-
 phi_pT_eta_trento.py
  -Plots the values of phi, pT, and eta that are created for the trento backgrounds
 
@@ -74,8 +68,8 @@ restricted_jetpT.py
 Npart_bins.py
  - Plots initial entropy (mult) vs. number of participants (Npart) for trento data
 
-nCh_mult_events.py
- -creates a histogram showing the frequency of different charged multiplicities for pythia QCD processes
+nCh_pythiaEvents.py
+ -creates a histogram showing the frequency of different charged multiplicities for pythia QCD/QED events
 
 scanPythia.py
  -prints slowJet information about pythia events such as jet constituents and jet pT
@@ -84,4 +78,4 @@ optimize_slowjet.py
  -creates a 2d histogram showing how many jets slowJet finds for different values of radius and pTjetMin
 
 slowJetpT_vs_pTHat.py
- -compares the jet pT produced by pythia QCD events to the calculated jet pT found by slowJet
+ -compares the jet pT produced by pythia QCD/QED events to the calculated jet pT found by slowJet
