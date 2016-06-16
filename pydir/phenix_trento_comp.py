@@ -234,6 +234,14 @@ def main():
     plt.xlabel("\nN$_{part}$")
 
     plt.legend(loc=0, fontsize = 8)
-    plt.show()
+    plt.show(block = False)
+
+    query = raw_input("<CR> to continue, p to save to pdf: ")
+    if (query=='p'):
+        query = raw_input("name this pdf file (do not include extension .pdf): ")
+        filename = query + '.pdf'
+        plt.savefig(filename)
+        print 'file saved as', filename
+        query = raw_input("<CR> to continue: ")
 
 if __name__ == '__main__':main()

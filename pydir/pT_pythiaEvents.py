@@ -151,30 +151,50 @@ def main():
         # create bins using np.histogram and plot results
         plt.subplot(subplot)
         
+        # define function for bin error
+        def bin_err(bin_counts):
+            bin_err = []
+            for val in bin_counts:
+                if val != 0:
+                    bin_err.append(1/(val**0.5))
+                else:
+                    bin_err.append(0)
+            return bin_err
+        
         if QED == 'on':
-            w,binEdges=np.histogram(pT_201,bins=b,range=r)
-            wbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            w,wbinEdges=np.histogram(pT_201,bins=b,range=r)
+            wbincenters = 0.5*(wbinEdges[1:]+wbinEdges[:-1])
+            werror = bin_err(w)
+            
             x,binEdges=np.histogram(pT_202,bins=b,range=r)
             xbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            xerror = bin_err(x)
+            
             y,binEdges=np.histogram(pT_203,bins=b,range=r)
             ybincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            yerror = bin_err(y)
+
             z,binEdges=np.histogram(pT_204,bins=b,range=r)
             zbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            zerror = bin_err(z)
+            
             v,binEdges=np.histogram(pT_205,bins=b,range=r)
             vbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            verror = bin_err(v)
             
             if len(pT_205)>0:
-                plt.semilogy(vbincenters,v,'d',label='g g -> gamma gamma')
+                plt.errorbar(vbincenters,v,yerr=verror,fmt='d',label='g g -> gamma gamma')
             if len(pT_201)>0:
-                plt.semilogy(wbincenters,w,'o',label='q g -> q gamma (udscb)')
+                plt.errorbar(wbincenters,w,yerr=werror,fmt='o',label='q g -> q gamma (udscb)')
             if len(pT_202)>0:
-                plt.semilogy(xbincenters,x,'*',label='q qbar -> g gamma')
+                plt.errorbar(xbincenters,x,yerr=xerror,fmt='*',label='q qbar -> g gamma')
             if len(pT_203)>0:
-                plt.semilogy(ybincenters,y,'^',label='g g -> g gamma')
+                plt.errorbar(ybincenters,y,yerr=yerror,fmt='^',label='g g -> g gamma')
             if len(pT_204)>0:
-                plt.semilogy(zbincenters,z,'s',label="f fbar -> gamma gamma")
+                plt.errorbar(zbincenters,z,yerr=zerror,fmt='s',label="f fbar -> gamma gamma")
             
             plt.title("pythia pT for hard QED processes")
+            plt.yscale('log')
             plt.xlabel("pT")
             plt.ylabel("counts")
             plt.legend(loc=0)
@@ -183,23 +203,31 @@ def main():
         if QCD == 'on':
             w,binEdges=np.histogram(pT_111,bins=b,range=r)
             wbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            werror = bin_err(w)
+            
             x,binEdges=np.histogram(pT_112,bins=b,range=r)
             xbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            xerror = bin_err(x)
+                             
             y,binEdges=np.histogram(pT_113,bins=b,range=r)
             ybincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            yerror = bin_err(y)
+            
             z,binEdges=np.histogram(pT_114,bins=b,range=r)
             zbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+            zerror = bin_err(z)
     
             if len(pT_111)>0:
-                plt.semilogy(wbincenters,w,'o',label='g g -> g g')
+                plt.errorbar(wbincenters,w,yerr=werror,fmt='o',label='g g -> g g')
             if len(pT_112)>0:
-                plt.semilogy(xbincenters,x,'*',label='g g -> q q(bar)')
+                plt.errorbar(xbincenters,x,yerr=xerror,fmt='*',label='g g -> q q(bar)')
             if len(pT_113)>0:
-                plt.semilogy(ybincenters,y,'^',label='q g -> q g')
+                plt.errorbar(ybincenters,y,yerr=yerror,fmt='^',label='q g -> q g')
             if len(pT_114)>0:
-                plt.semilogy(zbincenters,z,'s',label="q q(bar)' -> q q(bar)'")
+                plt.errorbar(zbincenters,z,yerr=zerror,fmt='s',label="q q(bar)' -> q q(bar)'")
             
             plt.title("pythia pT for hard QCD processes")
+            plt.yscale('log')
             plt.xlabel("pT")
             plt.ylabel("counts")
             plt.legend(loc = 0)

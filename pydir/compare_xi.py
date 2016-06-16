@@ -140,7 +140,8 @@ def main():
         
         #   Initialize SlowJet
         etaMax = 4.
-        nSel = 2    
+        nSel = 2
+        massSet = 2    
         
         xi_r1 = []
         xi_r2 = []
@@ -269,7 +270,7 @@ def main():
                     pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
                 
             # Initialize slowJet for radius 0.3
-            slowJet = pythia8.SlowJet( -1, 0.3, pTjetMin, etaMax, nSel, 1)
+            slowJet = pythia8.SlowJet( -1, 0.3, pTjetMin, etaMax, nSel, massSet)
             slowJet.analyze(pythia.event)
             jets_found = slowJet.sizeJet()
     
@@ -379,26 +380,41 @@ def main():
                                 prt_xi = math.log(z)
                                 xi_r3.append(prt_xi)
     
+        # define function for bin error
+        def bin_err(bin_counts):
+            bin_err = []
+            for val in bin_counts:
+                if val != 0:
+                    bin_err.append(1/(val**0.5))
+                else:
+                    bin_err.append(0)
+            return bin_err
+        
         # put xi data into histogram bins
         w,binEdges = np.histogram(xi_true,bins=bins) 
         wbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+        werror = bin_err(w)
     
         x,binEdges = np.histogram(xi_r1,bins=bins) 
         xbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
-    
+        xerror = bin_err(x)
+        
         y,binEdges = np.histogram(xi_r2,bins=bins) 
         ybincenters = 0.5*(binEdges[1:]+binEdges[:-1])
-    
+        yerror = bin_err(y)
+        
         z,binEdges = np.histogram(xi_r3,bins=bins) 
         zbincenters = 0.5*(binEdges[1:]+binEdges[:-1])
+        zerror = bin_err(z)
         
         # create plot with title and legend
         plt.subplot(subplot)
-        plt.plot(wbincenters, w, 'o', label = 'true xi')
-        plt.plot(xbincenters, x, '^', label = 'xi, r = 0.3')
-        plt.plot(ybincenters, y, 's', label = 'xi, r = 0.5')
-        plt.plot(zbincenters, z, 'd', label = 'xi, r = 0.7')
-    
+        plt.errorbar(wbincenters, w, yerr = werror, fmt = 'o', label = 'true xi')
+        plt.errorbar(xbincenters, x, yerr = xerror, fmt = '^', label = 'xi, r = 0.3')
+        plt.errorbar(ybincenters, y, yerr = yerror, fmt = 's', label = 'xi, r = 0.5')
+        plt.errorbar(zbincenters, z, yerr = zerror, fmt = 'd', label = 'xi, r = 0.7')
+
+        plt.ylim(ymin=0)
         plt.xlabel('xi')
         plt.ylabel('counts')
         plt.xlim(0,10)

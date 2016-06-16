@@ -188,6 +188,7 @@ ax.bar3d(xcenters,ycenters,base,dx,dy,av_jets_found,color='b',alpha=1)
 ax.set_xlabel('pTjetMin',fontsize=20)
 ax.set_ylabel('radius',fontsize=20)
 ax.set_zlabel('average jets_found/event')
+plt.title('SlowJet Optimization')
 
 #   separate 1d plots are made for both pTjetMin and radius       
 plt.figure(1)
