@@ -228,12 +228,12 @@ def main():
             plt.errorbar(Npart, scaled_dNch, yerr = pub_err, fmt = 'h', color = 'brown', label = '7.7 GeV Au + Au')
             
     
-    plt.title('phenix data / trento comparison')
-    plt.ylabel("(dN$_{ch}$/d$\eta$)/(N$_{part}$/2)")
+    plt.title('PHENIX data / TRENTO comparison')
+    plt.ylabel("(dN$_{ch}$/d$\eta$)/(N$_{part}$/2)", fontsize = 15)
     plt.ylim(0.5,5)
-    plt.xlabel("\nN$_{part}$")
+    plt.xlabel("\nN$_{part}$\n", fontsize = 20)
 
-    plt.legend(loc=0, fontsize = 8)
+    plt.legend(loc=0, fontsize = 12)
     plt.show(block = False)
 
     query = raw_input("<CR> to continue, p to save to pdf: ")

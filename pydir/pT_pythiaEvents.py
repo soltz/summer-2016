@@ -156,7 +156,7 @@ def main():
             bin_err = []
             for val in bin_counts:
                 if val != 0:
-                    bin_err.append(1/(val**0.5))
+                    bin_err.append((val**0.5))
                 else:
                     bin_err.append(0)
             return bin_err
@@ -195,6 +195,7 @@ def main():
             
             plt.title("pythia pT for hard QED processes")
             plt.yscale('log')
+            plt.ylim(ymin=0)
             plt.xlabel("pT")
             plt.ylabel("counts")
             plt.legend(loc=0)
@@ -228,6 +229,7 @@ def main():
             
             plt.title("pythia pT for hard QCD processes")
             plt.yscale('log')
+            plt.ylim(ymin=0)
             plt.xlabel("pT")
             plt.ylabel("counts")
             plt.legend(loc = 0)

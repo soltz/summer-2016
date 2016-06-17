@@ -385,7 +385,7 @@ def main():
             bin_err = []
             for val in bin_counts:
                 if val != 0:
-                    bin_err.append(1/(val**0.5))
+                    bin_err.append(val**0.5)
                 else:
                     bin_err.append(0)
             return bin_err
@@ -415,24 +415,25 @@ def main():
         plt.errorbar(zbincenters, z, yerr = zerror, fmt = 'd', label = 'xi, r = 0.7')
 
         plt.ylim(ymin=0)
-        plt.xlabel('xi')
-        plt.ylabel('counts')
+        plt.xlabel('xi', fontsize = 15)
+        plt.ylabel('counts', fontsize = 15)
         plt.xlim(0,10)
-        
-        title = 'Values of xi for reconstructed jets and true jets'
-        plt.title(title)
 
         if trento:
             if QCD == 'on':
-                legend_title = 'QCD, trento on'
+                title = 'QCD Jets with TRENTO Background'
             if QED == 'on':
-                legend_title = 'QED, trento on'
+                title = 'QED Jets with TRENTO Background'
         else:
             if QCD == 'on':
-                legend_title = 'QCD, trento off'
+                title = 'QCD Jets, no TRENTO Background'
             if QED == 'on':
-                legend_title = 'QED, trento off'
-        plt.legend(loc=0, title = legend_title)
+                title = 'QED Jets, no TRENTO Background'
+        
+        plt.title(title, fontsize = 15)
+
+        
+        plt.legend(loc=0)
 
     plt.show(block = False)
 
