@@ -83,11 +83,13 @@ Figure 2 shows two lego plots, one for a QCD event and one for a QED event. Thes
 % Explain how we generate pT, eta, and phi.
 % Explain we add radial flow and elliptic flow from epsilon_2 variable.
 %
-\trento\ allows users to input several physical options in order to create realistic heavy ion collision backgrounds. These options include two projectiles, number of events, reduced-thickness, fluctuation, nucleon-width, cross-section, and a normalization factor. For each data set,  we used non-deformed gold (Au) nuclei with 197 nucleons each. We produced 100,000 events for several different cross-sections. All other physical options were left to their default settings: reduced-thickness = 0, fluctuation = 1, nucleon-width = 0.5 fm, and normalization = 1. Different cross-sections correspond to different beam $E_{CM}$ per nucleon pair. The cross-sections (in units of fm$^2$) that we used to simulate the different beam energies are shown in table 1. \trento\ reads in the options and produces a text file listing several event properties for each event: event number, impact parameter, number of participants, initial entropy, and properties of flow. The produced \trento\ text files were then imported into our programs as an array of event data.
+\trento\ allows users to input several physical options in order to create realistic heavy ion collision backgrounds. These options include two projectiles, number of events, reduced-thickness, fluctuation, nucleon-width, cross-section, and a normalization factor. For each data set,  we used non-deformed gold (Au) nuclei with 197 nucleons each. We produced 100,000 events for several different cross-sections. All other physical options were left to their default settings: reduced-thickness = 0, fluctuation = 1, nucleon-width = 0.5 fm, and normalization = 1. Different cross-sections correspond to different beam $E_{CM}$ per nucleon pair. The cross-sections (in units of fm$^2$) that we used to simulate the different beam energies are shown in Table~\ref{tab_phenix_trento}. \trento\ reads in the options and produces a text file listing several event properties for each event: event number, impact parameter, number of participants, initial entropy, and properties of flow. The produced \trento\ text files were then imported into our programs as an array of event data.
+%
 \begin{center}
-\begin{table}
+\begin{table}[th]
 \centering
 \caption{Cross Sections and Scaling Constants}
+\label{tab_phenix_trento}
 \begin{tabular}{|c|l|l|}
 \hline
 $E_{CM}$(GeV) & $\sigma_{nn}$(fm$^2$) & Scaling Constant \\
@@ -112,7 +114,7 @@ $E_{CM}$(GeV) & $\sigma_{nn}$(fm$^2$) & Scaling Constant \\
 \end{table}
 \end{center}
 
-To use the \trento\ data as we intended we had to produce accurate Au-Au multiplicities for the various beam energies. To do this we fit the \trento\ data to PHENIX data as shown in figure 3. We created a histogram for the number of participants in each \trento\ event and weighted the bins by the initial entropy. We then scaled the \trento\ data at each energy by a constant to fit it to the PHENIX data of charged multiplicity vs. number of participants. The \trento\ data points are the open shapes that and are connected by lines. Using the scaling constants from the fit at each energy allowed us to create multiplicity values from the initial entropy values. The scaling constants are that we used are shown in table 1.
+To use the \trento\ data as we intended we had to produce accurate Au-Au multiplicities for the various beam energies. To do this we fit the \trento\ data to PHENIX data as shown in figure 3.  We created a histogram for the number of participants in each \trento\ event and weighted the bins by the initial entropy. We then scaled the \trento\ data at each energy by a constant to fit it to the PHENIX data of charged multiplicity vs. number of participants. The \trento\ data points are the open shapes that and are connected by lines. Using the scaling constants from the fit at each energy allowed us to create multiplicity values from the initial entropy values. The scaling constants are that we used are shown in Table~\ref{tab_phenix_trento}.
 
 Using the \trento\ multiplicity values we now knew how many background particles to create for each \trento\ event. To generate values of transverse momentum ($p_T$), pseudo-rapidity ($\eta$), and azimuthal angle ($\phi$) for each particle we used the numpy random number generator. For $\phi$  and $\eta$ we created flat distributions between -$\pi$ to $\pi$ and -2 to 2, and for $p_T$ we sampled from a Gaussian deviate, which is equivalent to a thermal Boltzmann distribution. We also included radial and elliptic flow into our background distributions by using the $\epsilon_2$ variable from the \trento\ data. First we calculated the initial transverse rapidity ($y_T$) and then applied flow as an additive boost. 
 \[y_{Boost} = \rho \times \rho_0 + \rho_2 \times \epsilon_2 \times cos(2\phi)\]
@@ -197,28 +199,34 @@ In figure 8, $\xi$ is calculated for both QCD and QED events with no \trento\ da
 
 \section{Listing of Python Scripts}
 \begin{description}
-\item[2d\_hist\_jetplot\_wcol.py] Displays Pythia events in ($\eta$,$\phi$) space, SlowJet jets are colored red
-\item[2d\_hist\_trento.py] Displays \trento\ backgrounds in ($\eta$,$\phi$) space
-\item[2d\_hist\_truejet\_wcol.py] Displays Pythia events in ($\eta$,$\phi$) space, SlowJet jets are compared to true jets
-\item[3d\_jetplot\_2016.py] Displays Pythia events in ($\eta$,$\phi$) space, particles shown individually, SlowJet jets are colored red
-\item[Npart\_bins.py] Plots initial entropy (mult) vs. number of participants (Npart) for \trento\ data
-\item[compare\_xi.py] Compares $\xi$ for true and reconstructed jets
-\item[nCh\_pythiaEvents.py] Shows the frequency of charged multiplicities for various Pythia QCD/QED processes
+\item[2d\_pythia\_slowjet.py] Displays Pythia events in ($\eta$,$\phi$) space, SlowJet jets are colored red
+\item[2d\_trento.py] Displays \trento\ backgrounds in ($\eta$,$\phi$) space
+\item[2d\_pythia\_slowjet\_truejet.py] Displays Pythia events in ($\eta$,$\phi$) space, SlowJet jets are compared to true jets
+\item[2d\_trento\_slowjet.py] Displays \trento\ background in ($\eta$,$\phi$) space, SlowJet identified jets are colored red
+\item[2d\_pythia\_trento\_slowjet.py] Displays Pythia events with \trento\ backgrounds in ($\eta$,$\phi$) space, bars are colored to show SlowJet performance
+\item[2d\_pythia\_trento\_slowjet\_truejet.py] Displays Pythia events with \trento\ backgrounds in ($\eta$,$\phi$) space, SlowJet jets are compared to true jets
+\item[3d\_pythia\_slowjet.py] Displays Pythia events in ($\eta$,$\phi$) space, particles shown individually, SlowJet jets are colored red
+%
 \item[phenix\_data.py] PHENIX data plotted with error bars for charged multiplicity vs. number of participants, Au-Au at various energies
 \item[phenix\_trento\_comp.py] Fits \trento\ data to PHENIX data for various Au-Au energies, charged multiplicity vs. number of participants
-\item[phi\_pT\_eta\_trento.py] Plots the values of $\phi$, $p_T$, and $\eta$ that are created for the \trento\ backgrounds
-\item[optimize\_slowjet.py] Creates a 2d histogram for SlowJet parameters radius and $p_TjetMin$ and shows average jets found for various values
-\item[pT\_pythiaEvents.py] Plots frequency of various QED/QCD Pythia hard processes
-\item[pythia\_slowjet\_trento\_hist.py] Displays Pythia events with \trento\ backgrounds in ($\eta$,$\phi$) space, bars are colored to show SlowJet performance
-\item[restricted\_jetpT.py] Tests various values of SlowJet radius while the Pythia jets are in a restricted $p_T$ range
+%
+\item[pythia\_mult\_process.py] Shows the frequency of charged multiplicities for various Pythia QCD/QED processes
+\item[pythia\_pT\_process.py] Plots frequency of various QED/QCD Pythia hard processes
+%
 \item[scanPythia.py] Rrints SlowJet information about Pythia events such as jet constituents and jet $p_T$
 \item[slowJetpT\_vs\_pTHat.py] Compares the true jet $p_T$ produced by Pythia QCD/QED events to the SlowJet jet $p_T$ 
-\item[slowjet\_trento\_hist.py] Displays \trento\ background in ($\eta$,$\phi$) space, SlowJet identified jets are colored red
-\item[trento\_in\_python.py] Creates plots for \trento\ data, such as initial entropy vs. impact parameter and number of participants vs. impact parameter, as well as others
-\item[truejet\_wtrento.py] Displays Pythia events with \trento\ backgrounds in ($\eta$,$\phi$) space, SlowJet jets are compared to true jets
-\item[xi\_reconstructed\_jets.py] Creates a histogram of $\xi$ values for SlowJet jets
-\item[xi\_true\_jets.py] Creates a histogram of $\xi$ values for true jets
+\item[slowjet\_pTmin\_radius.py] Creates a 2d histogram for SlowJet parameters radius and $p_TjetMin$ and shows average jets found for various values
+\item[slowjet\_pTrange\_radius.py] Tests various values of SlowJet radius while the Pythia jets are in a restricted $p_T$ range
+%
+\item[trento\_mult\_npart.py] Plots initial entropy (mult) vs. number of participants (Npart) for \trento\ data
+\item[trento\_plot\_values.py] Creates plots for \trento\ data, such as initial entropy vs. impact parameter and number of participants vs. impact parameter, as well as others
+\item[trento\_phi\_pT\_eta.py] Plots the values of $\phi$, $p_T$, and $\eta$ that are created for the \trento\ backgrounds
+%
+\item[xi\_slowjet.py] Creates a histogram of $\xi$ values for SlowJet jets
+\item[xi\_truejet.py] Creates a histogram of $\xi$ values for true jets
+\item[xi\_slowjet\_truejet.py] Compares $\xi$ for true and reconstructed jets
 \end{description}
+
 
 \begin{thebibliography}{10}
 
