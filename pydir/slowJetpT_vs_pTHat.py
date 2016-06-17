@@ -6,12 +6,16 @@
 import pythia8
 import matplotlib.pyplot as plt
 import numpy as np
+import math
+from scipy.stats.mstats import mquantiles
 import getopt, sys
 
 def usage():
     print '3d_jetplot_2016.py plots a 3d bar graph for p-p events created by pythia8.'
     print 'Usage: python 3d_jetplot_2016.py [options]'
     print '   -h, --help      : this message'
+    print '   -t, --trento     : include trento background'
+    print '   -f, --file     = set trento file [AuAu_200GeV_100k.txt]'
     print '   -c, --QCD     : turn hard QCD processes off'
     print '   -q, --QED     : turn hard QED processes on'
     print '   -e, --eCM     = beam center-of-mass energy (GeV) [200.0]'
@@ -29,15 +33,15 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hcqe:n:x:u:p:r:mib:s:', \
-              ['help','QCD','QED','eCM=','pTHatMin=','pTHatMax=','num=','pTjetMin=','radius=','massSet','hist',
+        opts, args = getopt.getopt(sys.argv[1:], 'htf:cqe:n:x:u:p:r:mib:s:', \
+              ['help','trento','file=','QCD','QED','eCM=','pTHatMin=','pTHatMax=','num=','pTjetMin=','radius=','massSet','hist',
                'bins=','seed='])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
         sys.exit(2)
 
-     # Pythia settings
+    # Pythia settings
     eCM  = 200.0
     pTHatMin  = 20.0
     pTHatMax  = 50.0
@@ -45,6 +49,10 @@ def main():
     QED = 'off'
     num_events = 300
     seed  = -1
+
+    # trento settings
+    trento = False
+    trento_file = 'AuAu_200GeV_100k.txt'
 
     # SlowJet settings
     radius = 0.7
@@ -59,6 +67,10 @@ def main():
         if o in ('-h', '--help'):
             usage()
             sys.exit()
+        elif o in ('-t', '--trento'):
+            trento = True
+        elif o in ('-f', '--file'):
+            trento_file = str(a)
         elif o in ('-c', '--QCD'):
             QCD = 'off'
         elif o in ('-q', '--QED'):
@@ -111,17 +123,133 @@ def main():
 
     pythia.init()
 
+    if trento:
+        #   load trento data for 100,000 Au Au events
+        data = np.loadtxt(trento_file)
+
+        #   data = [[event_number, impact_param, Npart, mult, e2, e3, e4, e5],...]
+        #   create a list for the initial entropy of the events
+        mult = data[:,3]
+        e2 = data[:,4]
+
+        #   apply proportionality constanst to convert initial entropy to charged multiplicity
+        #   constant was calculated by fitting the trento data to phenix data
+        if trento_file == 'AuAu_200GeV_100k.txt':
+            fit_par = 4.65905256
+        if trento_file == 'AuAu_130GeV_100k.txt':
+            fit_par = 3.96639009
+        if trento_file == 'AuAu_62p4GeV_100k.txt':
+            fit_par = 3.13381932
+        if trento_file == 'AuAu_39GeV_100k.txt':
+            fit_par = 2.54804101
+        if trento_file == 'AuAu_27GeV_100k.txt':
+            fit_par = 2.16041632
+        if trento_file == 'AuAu_19p6GeV_100k.txt':
+            fit_par = 1.95015905
+        if trento_file == 'AuAu_15p0GeV_100k.txt':
+            fit_par = 1.6460897
+        if trento_file == 'AuAu_7p7GeV_100k.txt':
+            fit_par = 1.27382896
+        mult = fit_par * mult
+
+        #   change the constituents of mult to int values
+        for i in range(len(mult)):
+            mult[i] = round(mult[i])
+        mult = mult.astype(np.int64)
+
+        T = 0.15 # temperature in GeV
+        deta = 4
+        # set pion mass to 0.14 GeV
+        mpi = 0.14
+        
+        # rho_0 scaling parameter for radial flow
+        # from Retiere and Lisa, PRC70.044907 (2004), table 2
+        rho_0 = 0.85
+        
+        # e2 scaling parameter for elliptic flow
+        # from Alver and Roland, PRC81.054905 (2010), fig 4
+        rho_2 = 0.15
+
 #   Initialize SlowJet
     etaMax = 4.
     nSel = 2    
     slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
 
 #   Loop over events recording both pTHat and the calculated slowJet pT
-    pTHat = [[],[],[],[],[]]
-    slowJet_pT = [[],[],[],[],[]]
+    pTHat = [[] for j in range(50)]
+    slowJet_pT = [[] for j in range(50)]
     
     for i in range(num_events):
         pythia.next()
+        # if trento is on then trento particles are created and added to the pythia data
+        if trento:
+            for j in range(mult[i]):
+                r1, r2, r3, r4, r5 = np.random.random(5)
+                while r5 > 0.99:
+                    r5 = np.random.random(1)
+
+                # pT = transverse momentum
+                pT_r1 = T*(math.sqrt(-2*math.log(r1)))
+
+                # phi = azimuthal angle
+                phi_r2 = 2*(math.pi)*(r2 - 0.5)
+
+                # eta = pseudo-rapidity
+                eta_r3 = deta*(r3 - 0.5)
+
+                # rho = normalized radial distance 
+                rho_r4 = r4**0.5
+
+                # particle selected randomly
+                if r5 <= 0.11:
+                    mass = 0.140
+                    pid = 211 # pi+
+                if r5 > 0.11 and r5 <= 0.22:
+                    mass = 0.140
+                    pid = -211 # pi-
+                if r5 > 0.22 and r5 <= 0.33:
+                    mass = 0.135
+                    pid = 111 # pi0
+                if r5 > 0.33 and r5 <= 0.44:
+                    mass = 0.494
+                    pid = 321 # K+
+                if r5 > 0.44 and r5 <= 0.55:
+                    mass = 0.494
+                    pid = -321 # K-
+                if r5 > 0.55 and r5 <= 0.66:
+                    mass = 0.938
+                    pid = 2212 # p
+                if r5 > 0.66 and r5 <= 0.77:
+                    mass = 0.938
+                    pid = -2212 # pbar
+                if r5 > 0.77 and r5 <= 0.88:
+                    mass = 0.940
+                    pid = 2112 # n
+                if r5 > 0.88 and r5 <= 0.99:
+                    mass = 0.940
+                    pid = -2112 # nbar
+
+                # calculate initial transverse rapidity (yT)
+                eT = (mass*mass+pT_r1*pT_r1)**0.5
+                yT = 0.5 * np.log((eT+pT_r1)/(eT-pT_r1))
+                pT_initial = pT_r1
+                yT_initial = yT
+
+                # apply flow as additive boost to transverse rapidity
+                yBoost = rho_r4*rho_0 + rho_2*e2[i]*np.cos(2*phi_r2)
+                yT = yT_initial + yBoost
+
+                # convert back to pT
+                pT_wflow = mass*np.cosh(yT)
+
+                # add particles to the event list
+                px = pT_wflow * math.cos(phi_r2)
+                py = pT_wflow * math.sin(phi_r2)
+                pz = pT_wflow * math.sinh(eta_r3)
+                E = (pT_wflow**2 + pz**2 + mass**2)**0.5
+                pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
+
+        #  use slowJet to analyze jets
         slowJet.analyze(pythia.event)
         for i in range(slowJet.sizeJet()):
             pTHat[i].append(pythia.info.pTHat())
@@ -131,53 +259,69 @@ def main():
     pythia.stat();
 
     if hist:
+        def bin_data(data1,data2,r,bins):
+            #   create quantiles for even binning
+            steps = 1.0/bins
+            p = np.arange(0,(1 + steps),steps)
+            quan = mquantiles(data1, prob = p)
+
+            #   ensure data is array type
+            data1 = np.array(data1)
+
+            binned_data, binedges = np.histogram(data1,bins=quan,range=r,weights=data2)
+
+            #   compile values in each bin
+            weighted_bins = []
+            for i in range(len(binedges) - 1):
+                if i == len(binedges) -2 :
+                    weighted_bins.append(data1[(data1 >= binedges[i]) & (data1 <= binedges[i+1])])
+                else:
+                    weighted_bins.append(data1[(data1 >= binedges[i]) & (data1 < binedges[i+1])])
+
+            #   divide each bin by count of that bin for normalization
+            weighted_bins = np.array(weighted_bins)
+            for i in range(len(weighted_bins)):
+                if len(weighted_bins[i]) == 0:
+                    binned_data[i] = binned_data[i]
+                else:
+                    binned_data[i] = binned_data[i]/(len(weighted_bins[i]))
+            weighted_bins = list(weighted_bins)
+                
+            #   record bin error
+            bin_err = []
+            for i in range(len(weighted_bins)):
+                count = len(weighted_bins[i])
+                if count == 0:
+                    bin_err.append(0)
+                else:
+                    bin_err.append(1/(count**0.5))
+            bin_err = np.array(bin_err)
+    
+            #   average values in each bin
+            for i in range(len(weighted_bins)):
+                if len(weighted_bins[i]) == 0:
+                    weighted_bins[i] = 0
+                else:
+                    weighted_bins[i] = np.mean(weighted_bins[i])
+    
+            return [weighted_bins, binned_data, bin_err]
+
+        # range for binning
         r = (pTHatMin,pTHatMax)
 
-        def bin_err(bin_counts):
-            bin_err = []
-            for val in bin_counts:
-                if val != 0:
-                    bin_err.append(1/(val**0.5))
-            return bin_err
-        
-        def norm(weighted_data, bincounts):
-            norm_data = []
-            for i in range(len(weighted_data)):
-                if bincounts[i] != 0:
-                    av = weighted_data[i]/bincounts[i]
-                    norm_data.append(av)
-            return norm_data
-
-        def rem_emp(bincenters, bincounts):
-            new_centers = []
-            for i in range(len(bincenters)):
-                if bincounts[i] != 0:
-                    new_centers.append(bincenters[i])
-            return new_centers
-        
-        w, wbinEdges = np.histogram(pTHat[0],bins=bins,range=r,weights=slowJet_pT[0])
-        wbincenters = 0.5*(wbinEdges[1:]+wbinEdges[:-1])
-        wcounts, binEdges = np.histogram(pTHat[0],bins=wbinEdges)
-        w = norm(w,wcounts)
-        w_error = bin_err(wcounts)
-        wbincenters = rem_emp(wbincenters, wcounts)
-        
-        x, xbinEdges = np.histogram(pTHat[1],bins=bins,range=r,weights=slowJet_pT[1])
-        xbincenters = 0.5*(xbinEdges[1:]+xbinEdges[:-1])
-        xcounts, binEdges = np.histogram(pTHat[1],bins=xbinEdges)
-        x = norm(x,xcounts)
-        x_error = bin_err(xcounts)
-        xbincenters = rem_emp(xbincenters, xcounts)
+        wbincenters, w, w_error = bin_data(pTHat[0],slowJet_pT[0],r,bins)
+        xbincenters, x, x_error = bin_data(pTHat[1],slowJet_pT[1],r,bins)
+        zbincenters, z, z_error = bin_data(pTHat[2],slowJet_pT[2],r,bins)
 
         plt.errorbar(wbincenters,w,yerr = w_error, fmt = 'o',label='slowJet 1')
         plt.errorbar(xbincenters,x,yerr = x_error, fmt = '^',label='slowJet 2')
+        #plt.errorbar(zbincenters,z,yerr = z_error, fmt = 's',label='slowJet 3')
 
         
     if not hist:
         plt.plot(pTHat[0],slowJet_pT[0],'o',label='slowJet 1', alpha = 0.2)
         plt.plot(pTHat[1],slowJet_pT[1],'^',label='slowJet 2', alpha = 0.2)
         plt.plot(pTHat[2],slowJet_pT[2],'s',label='slowJet 3', alpha = 0.2)
-#    plt.plot(pTHat[3],slowJet_pT[3],'d',label='slowJet 4')
 
     
     y = np.arange(0,50,0.5)
