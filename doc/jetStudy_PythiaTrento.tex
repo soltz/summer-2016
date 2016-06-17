@@ -55,15 +55,15 @@ For this study we work with the Pythia 8.219 Python package, which can be called
 %Describe pythia settings, show lego plot of jet events, for QCD and QED
 %Show distribution of jet pT distributions for QCD and QED
 %
-Pythia allows users to set the beam center-of-mass energy ($E_{CM}$). By default Pythia sets $E_{CM}$ to 14 TeV, the default for all our programs is 200 GeV.  Initial QCD or QED hard scattering processes may be turned on or off. Pythia also allows restrictions to be set on the transverse momentum produced by hard scattering ($p_{THat}$ or jet $p_T$). For our programs the jet $p_T$ range is typically 20-25 GeV. Figure 1 shows the distribution of jet $p_T$ for various QCD and QED processes restricted to the range of 20-50 GeV. The upper histogram of figure 1 shows the four most common QCD hard processes produced by Pythia. The different processes are shown in the legend. Gluons are represented by "g", quarks (uds) are represented by "q", and anti-quarks (uds) are represented by "q(bar)." There are also other hard processes, such as those that involve heavy quarks, but they occur so infrequently that they are not included. The lower histogram shows all five of the QED hard processes, however only two of the processes occur frequently. For these processes photons are represented by "gamma," and fermions participating in electroweak interactions are represented by "f" and "f(bar)."
+Pythia allows users to set the beam center-of-mass energy ($E_{CM}$). By default Pythia sets $E_{CM}$ to 14 TeV, the default for all our programs is 200 GeV.  Initial QCD or QED hard scattering processes may be turned on or off. Pythia also allows restrictions to be set on the transverse momentum produced by hard scattering ($p_{THat}$ or jet $p_T$). For our programs the jet $p_T$ range is typically 20-25 GeV. Figure~\ref{fig_pythia_pT_process} shows the distribution of jet $p_T$ for various QCD and QED processes restricted to the range of 20-50 GeV. The upper histogram of Figure~\ref{fig_pythia_pT_process} shows the four most common QCD hard processes produced by Pythia. The different processes are shown in the legend. Gluons are represented by "g", quarks (uds) are represented by "q", and anti-quarks (uds) are represented by "q(bar)." There are also other hard processes, such as those that involve heavy quarks, but they occur so infrequently that they are not included. The lower histogram shows all five of the QED hard processes, however only two of the processes occur frequently. For these processes photons are represented by "gamma," and fermions participating in electroweak interactions are represented by "f" and "f(bar)."
 
-Figure 2 shows two lego plots, one for a QCD event and one for a QED event. These plots demonstrate how our programs are able to display each Pythia event. Each particle that is produced from a Pythia event is binned in a 2 dimensional histogram depending on its pseudo-rapidity ($\eta$) and azimuthal angle ($\phi$). The histogram bins are weighted by transverse energy ($E_T$). In both plots it is easy to identify the jets produced by the Pythia events. For the QED plot it is important to note that one of the jets is produced by only a single photon. 
+Figure~\ref{fig_2d_pythia_slowjet} shows two lego plots, one for a QCD event and one for a QED event. These plots demonstrate how our programs are able to display each Pythia event. Each particle that is produced from a Pythia event is binned in a 2 dimensional histogram depending on its pseudo-rapidity ($\eta$) and azimuthal angle ($\phi$). The histogram bins are weighted by transverse energy ($E_T$). In both plots it is easy to identify the jets produced by the Pythia events. For the QED plot it is important to note that one of the jets is produced by only a single photon. 
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=0.8\textwidth]{pythia_pT_process.pdf}
-\label{fig_label}
 \caption{Distribution of jet pT for QCD and QED processes for 20,000 events.  Figure created with [python pythia\_pT\_process.py -m 20000]}
+\label{fig_pythia_pT_process}
 \end{center}
 \end{figure}
 
@@ -71,7 +71,7 @@ Figure 2 shows two lego plots, one for a QCD event and one for a QED event. Thes
 \begin{center}
 \includegraphics[width=0.49\textwidth]{2d_pythia_slowjet1.png}
 \includegraphics[width=0.49\textwidth]{2d_pythia_slowjet2.png}
-\label{fig_label}
+\label{fig_2d_pythia_slowjet}
 \caption{Pythia event display for a QCD event, shown to the left, and a QED event shown to the right.  Left figure created with [python 2d\_pythia\_slowjet.py -o -b 30]. Right figure created with [python 2d\_pythia\_slowjet.py -o -c -q -b 30]}
 \end{center}
 \end{figure}
@@ -114,26 +114,26 @@ $E_{CM}$(GeV) & $\sigma_{nn}$(fm$^2$) & Scaling Constant \\
 \end{table}
 \end{center}
 
-To use the \trento\ data as we intended we had to produce accurate Au-Au multiplicities for the various beam energies. To do this we fit the \trento\ data to PHENIX data as shown in figure 3.  We created a histogram for the number of participants in each \trento\ event and weighted the bins by the initial entropy. We then scaled the \trento\ data at each energy by a constant to fit it to the PHENIX data of charged multiplicity vs. number of participants. The \trento\ data points are the open shapes that and are connected by lines. Using the scaling constants from the fit at each energy allowed us to create multiplicity values from the initial entropy values. The scaling constants are that we used are shown in Table~\ref{tab_phenix_trento}.
+To use the \trento\ data as we intended we had to produce accurate Au-Au multiplicities for the various beam energies. To do this we fit the \trento\ data to PHENIX data as shown in Figure~\ref{fig_phenix_trento_comp}.  We created a histogram for the number of participants in each \trento\ event and weighted the bins by the initial entropy. We then scaled the \trento\ data at each energy by a constant to fit it to the PHENIX data of charged multiplicity vs. number of participants. The \trento\ data points are the open shapes that and are connected by lines. Using the scaling constants from the fit at each energy allowed us to create multiplicity values from the initial entropy values. The scaling constants are that we used are shown in Table~\ref{tab_phenix_trento}.
 
 Using the \trento\ multiplicity values we now knew how many background particles to create for each \trento\ event. To generate values of transverse momentum ($p_T$), pseudo-rapidity ($\eta$), and azimuthal angle ($\phi$) for each particle we used the numpy random number generator. For $\phi$  and $\eta$ we created flat distributions between -$\pi$ to $\pi$ and -2 to 2, and for $p_T$ we sampled from a Gaussian deviate, which is equivalent to a thermal Boltzmann distribution. We also included radial and elliptic flow into our background distributions by using the $\epsilon_2$ variable from the \trento\ data. First we calculated the initial transverse rapidity ($y_T$) and then applied flow as an additive boost. 
 \[y_{Boost} = \rho \times \rho_0 + \rho_2 \times \epsilon_2 \times cos(2\phi)\]
-The scaling parameter for radial flow ($\rho_0$) that we used was 0.85, taken from Table 2 of~\cite{Retiere:2004hn}.  The scaling parameter for elliptic flow ($\rho_2$) was 0.15 from Figure 4 of~\cite{Alver:2010do}.  Using the numpy random number generator we created a normalized radial distance ($\rho$). After applying flow, $y_T$ was converted back to $p_T$. The mass used for these calculations was chosen randomly from one of nine different particles that were included in the produced background. These particles consisted of pions, kaons, protons, and neutrons, as well as their anti particle counterparts. Figure 4 shows the background display produced from \trento\ events. Again each particle that is produced is binned in a 2 dimensional histogram in ($\eta$,$\phi$) space. For this plot the histogram bins are weighted by $p_T$. There are no jets produced within the \trento\ background.
+The scaling parameter for radial flow ($\rho_0$) that we used was 0.85, taken from Table 2 of~\cite{Retiere:2004hn}.  The scaling parameter for elliptic flow ($\rho_2$) was 0.15 from Figure 4 of~\cite{Alver:2010do}.  Using the numpy random number generator we created a normalized radial distance ($\rho$). After applying flow, $y_T$ was converted back to $p_T$. The mass used for these calculations was chosen randomly from one of nine different particles that were included in the produced background. These particles consisted of pions, kaons, protons, and neutrons, as well as their anti particle counterparts. Figure~\ref{fig_2d_trento} shows the background display produced from \trento\ events. Again each particle that is produced is binned in a 2 dimensional histogram in ($\eta$,$\phi$) space. For this plot the histogram bins are weighted by $p_T$. There are no jets produced within the \trento\ background.
 
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=0.8\textwidth]{phenix_trento_comp.pdf}
-\label{fig_label}
+\label{fig_phenix_trento_comp}
 \caption{Fit of \trento\ data to PHENIX data. Figure created with [python phenix\_trento\_comp.py]}
 \end{center}
 \end{figure}
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{2d_hist_trento.png}
-\includegraphics[width=0.49\textwidth]{2d_hist_trento2.png}
-\label{fig_label}
-\caption{\trento\ event display (no jets). High multiplicity is shown on the right and lower multiplicity on the left. Both plots created with [python 2d\_hist\_trento.py -b 30]}
+\includegraphics[width=0.49\textwidth]{2d_trento1.png}
+\includegraphics[width=0.49\textwidth]{2d_trento2.png}
+\label{fig_2d_trento}
+\caption{\trento\ event display (no jets). High multiplicity is shown on the right and lower multiplicity on the left. Both plots created with [python 2d\_trento.py -b 30]}
 \end{center}
 \end{figure}
 
@@ -145,25 +145,25 @@ The scaling parameter for radial flow ($\rho_0$) that we used was 0.85, taken fr
 %
 The SlowJet jet finder takes several input parameters that affect how it searches for jets. These parameters are power, radius, minimum jet $p_T$ ($p_TjetMin$), $etaMax$, select, and $massSet$. Power determines which jet finding algorithm to use. For our programs we set power to -1, this corresponds to the {\it anti-k$T$} algorithm. Other possible algorithms for SlowJet are the Cambridge/Aachen algorithm and the $kT$ algorithm. Radius is crudely related to the radius of the jet cone in ($y$,$\phi$) space. In most of our programs radius is set to 0.7 by default. $p_TjetMin$ is the minimum $p_T$ that a cluster must have to become a jet. Our values for $p_TjetMin$ are normally set to 10 or 15 GeV. $etaMax$ is the maximum +/- pseudo-rapidity that the detector is assumed to cover. For our programs $etaMax$ is always set to 2. Select determines which particles are analyzed by SlowJet. For our programs select is always set to 2 which corresponds to all observable final-state particles. $massSet$ determines the masses assumed for the particles analyzed by SlowJet. There are three $massSet$ options: 0 for all massless, 1 for photons are massless while all others are assigned the mass of charged pions, and 2 for all given their correct masses. For our programs $massSet$ is set to either 1 or 2. Radius and $p_TjetMin$ are the parameters that are most often changed while we examine jets.
 
-Figures 5 and 6 demonstrate how well SlowJet is able to function in Pythia events with varying amounts of heavy ion background. Both figures use the same familiar event display that was shown in figures 2 and 4 and use the standard SlowJet settings discussed above. In these figures the color scheme is that Pythia jets that are identified correctly by SlowJet are colored green, particles mistakenly identified as SlowJet jets is colored yellow,  Pythia jets that are missed by SlowJet are colored red, and all other background particles are colored blue. Figure 5 shows two Pythia events with no heavy ion background. In the event shown on the left SlowJet correctly identifies both jets. However, in the event on the right, the second jet is too diffuse and SlowJet does not identify it as a jet. Figure 6 is a greater test for SlowJet because now a \trento\ background is introduced. In the low \trento\ multiplicity event, SlowJet is still able to correctly identify the two jets, however a few background particles, shown in yellow, are also lumped in with the jets.  In the high \trento\ multiplicity event SlowJet becomes confused. In this case there are many \trento\ particles identified as jets, those shown in yellow. The true jets become lost in the background and SlowJet fails.
+Figure~\ref{fig_2d_pythia_slowjet_truejet} and Figure~\ref{fig_2d_pythia_trento_slowjet_truejet} demonstrate how well SlowJet is able to function in Pythia events with varying amounts of heavy ion background. Both figures use the same familiar event display that was shown in Figure~\ref{fig_2d_pythia_slowjet} and Figure~\ref{fig_2d_trento} and use the standard SlowJet settings discussed above. In these figures the color scheme is that Pythia jets that are identified correctly by SlowJet are colored green, particles mistakenly identified as SlowJet jets are colored yellow,  Pythia jets that are missed by SlowJet are colored red, and all other background particles are colored blue. Figure~\ref{fig_2d_pythia_slowjet_truejet} shows two Pythia events with no heavy ion background. In the event shown on the left SlowJet correctly identifies both jets. However, in the event on the right, the second jet is too diffuse and SlowJet does not identify it as a jet. Figure~\ref{fig_2d_pythia_trento_slowjet_truejet} is a greater test for SlowJet because now a \trento\ background is introduced. In the low \trento\ multiplicity event, SlowJet is still able to correctly identify the two jets, however a few background particles, shown in yellow, are also lumped in with the jets.  In the high \trento\ multiplicity event SlowJet becomes confused. In this case there are many \trento\ particles identified as jets, those shown in yellow. The true jets become lost in the background and SlowJet fails.
 
-All the bar plots in figures 5 and 6 are created in a way so that bars are stacked on top of each other if two different color bars share the same bin. The order in which the bars are stacked is that the blue bars corresponding to background not mistaken as jets goes on the bottom. The red bars associated with true jet particles not identified as jets are stacked next. Then the yellow bars associated with falsely identified jets are stacked. Correctly identified jets, shown in green, are then stacked on the very top. This order of stacking the bars is the most useful when displaying very congested events because it is easy to see how SlowJet performed.
+All the bar plots in Figure~\ref{fig_2d_pythia_slowjet_truejet} and Figure~\ref{fig_2d_pythia_trento_slowjet_truejet} are created in a way so that bars are stacked on top of each other if two different color bars share the same bin. The order in which the bars are stacked is that the blue bars corresponding to background not mistaken as jets goes on the bottom. The red bars associated with true jet particles not identified as jets are stacked next. Then the yellow bars associated with falsely identified jets are stacked. Correctly identified jets, shown in green, are then stacked on the very top. This order of stacking the bars is the most useful when displaying very congested events because it is easy to see how SlowJet performed.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{2d_hist_truejet_wcol1.png}
-\includegraphics[width=0.49\textwidth]{2d_hist_truejet_wcol2.png}
-\label{fig_label}
-\caption{Event display for Pythia with SlowJet Finder, no heavy ion background.  SlowJet succeeds on the left but struggles on the right. Both plots created with [python 2d\_hist\_truejet\_wcol.py]}
+\includegraphics[width=0.49\textwidth]{2d_pythia_slowjet_truejet1.png}
+\includegraphics[width=0.49\textwidth]{2d_pythia_slowjet_truejet2.png}
+\label{fig_2d_pythia_slowjet_truejet}
+\caption{Event display for Pythia with SlowJet Finder, no heavy ion background.  SlowJet succeeds on the left but struggles on the right. Both plots created with [python 2d\_pythia\_slowjet\_truejet.py]}
 \end{center}
 \end{figure}
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{truejet_wtrento1.png}
-\includegraphics[width=0.49\textwidth]{truejet_wtrento2.png}
-\label{fig_label}
-\caption{Event display for Pythia+Trento with SlowJet Finder. Low multiplicity \trento\ background shown to the left and high multiplicity \trento\ background shown to the right. Correctly identified jets are colored green, mistakenly identified jets are colored yellow, jets that SlowJet missed are colored red, and all background particles are colored blue. Both plots created with [python truejet\_wtrento.py]}
+\includegraphics[width=0.49\textwidth]{2d_pythia_trento_slowjet_truejet1.png}
+\includegraphics[width=0.49\textwidth]{2d_pythia_trento_slowjet_truejet2.png}
+\label{fig_2d_pythia_trento_slowjet_truejet}
+\caption{Event display for Pythia+Trento with SlowJet Finder. Low multiplicity \trento\ background shown to the left and high multiplicity \trento\ background shown to the right. Correctly identified jets are colored green, mistakenly identified jets are colored yellow, jets that SlowJet missed are colored red, and all background particles are colored blue. Both plots created with [python 2d\_pythia\_trento\_slowjet\_truejet.py]}
 \end{center}
 \end{figure}
 
@@ -172,26 +172,26 @@ All the bar plots in figures 5 and 6 are created in a way so that bars are stack
 % Define formula for fragmentation function.
 % Explain methodology for tracing particles in jets
 %
-To study jets and explore the different parameters of SlowJet we first focused on the SlowJet parameters of radius and $p_TjetMin$. One of our programs examined how many jets were identified in Pythia events with \trento\ backgrounds. Ideally SlowJet should identify 2 jets for each Pythia event. We found that when $p_TjetMin$ was set low and radius was set high, far too many jets would be identified on average. However, if $p_TjetMin$ was set high and radius set low, very few jets would be identified. In the \trento\ backgrounds it is difficult to raise the requirements for clusters to be identified as jets while still being able to identify all Pythia jets. The plots produced by this program are shown in figure 7. Another program restricted the $p_T$ of Pythia jets to 20-25 GeV and set $p_TjetMin$ to 15 GeV. Radius was then varied to see if the identified jets would be in the correct $p_T$ range. We found similar results. Increasing radius to values as high as 0.8 caused the peak of identified jets to be within the proper $p_T$ range but also allowed many jets above the range to be identified as well. Decreasing radius to values as low as 0.3 caused the peak of identified jets to fall below the proper $p_T$ range but reduced the number of jets that were identified above the range.
+To study jets and explore the different parameters of SlowJet we first focused on the SlowJet parameters of radius and $p_TjetMin$. One of our programs examined how many jets were identified in Pythia events with \trento\ backgrounds. Ideally SlowJet should identify 2 jets for each Pythia event. We found that when $p_TjetMin$ was set low and radius was set high, far too many jets would be identified on average. However, if $p_TjetMin$ was set high and radius set low, very few jets would be identified. In the \trento\ backgrounds it is difficult to raise the requirements for clusters to be identified as jets while still being able to identify all Pythia jets. The plots produced by this program are shown in Figure~\ref{fig_slowjet_pTmin_radius}. Another program restricted the $p_T$ of Pythia jets to 20-25 GeV and set $p_TjetMin$ to 15 GeV. Radius was then varied to see if the identified jets would be in the correct $p_T$ range. We found similar results. Increasing radius to values as high as 0.8 caused the peak of identified jets to be within the proper $p_T$ range but also allowed many jets above the range to be identified as well. Decreasing radius to values as low as 0.3 caused the peak of identified jets to fall below the proper $p_T$ range but reduced the number of jets that were identified above the range.
 
 Our next focus was on the fragmentation function value ($\xi$) for particles within both SlowJet jets and true jets. To calculate $\xi$ we used the following formula:
 \[\xi = ln((\vec{p_{jet}} \cdot \vec{p_{jet}})/(\vec{p_{jet}} \cdot \vec{p_{prt}}))\]
-In figure 8, $\xi$ is calculated for both QCD and QED events with no \trento\ data on the left and with \trento\ data on the right. $\xi$ is calculated for SlowJet jets with radius set at 0.3, 0.5, and 0.7 in all four plots. In the plots it is noticeable that as radius is decreased the peak of $\xi$ values for reconstructed jets is reduced. This occurs because particles with higher $\xi$ values are farther away from the center of the jet cone. As radius is decreased particles on the edge of the jet cone are no longer included in the reconstructed jets. True jets consist of all particles that are ancestors of the initial hard scattering in each Pythia event. These particles were identified by tracing the daughters of each particle starting with the two initial particles that participated in the hard process and ending when only final state particles remain.
+In Figure~\ref{fig_xi_slowjet_truejet}, $\xi$ is calculated for both QCD and QED events with no \trento\ data on the left and with \trento\ data on the right. $\xi$ is calculated for SlowJet jets with radius set at 0.3, 0.5, and 0.7 in all four plots. In the plots it is noticeable that as radius is decreased the peak of $\xi$ values for reconstructed jets is reduced. This occurs because particles with higher $\xi$ values are farther away from the center of the jet cone. As radius is decreased particles on the edge of the jet cone are no longer included in the reconstructed jets. True jets consist of all particles that are ancestors of the initial hard scattering in each Pythia event. These particles were identified by tracing the daughters of each particle starting with the two initial particles that participated in the hard process and ending when only final state particles remain.
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.49\textwidth]{optimize_slowjet1.pdf}
-\includegraphics[width=0.49\textwidth]{optimize_slowjet2.pdf}
-\label{fig_label}
-\caption{The 2 dimensional histogram on the left shows the average number of jets found by SlowJet in Pythia events with \trento\ background. The plots on the right are 1 dimensional scatter plots that explore the optimization of each parameter individually. All plots created with [python optimize\_slowjet.py]}
+\includegraphics[width=0.49\textwidth]{slowjet_pTmin_radius1.pdf}
+\includegraphics[width=0.49\textwidth]{slowjet_pTmin_radius2.pdf}
+\label{fig_slowjet_pTmin_radius}
+\caption{The 2 dimensional histogram on the left shows the average number of jets found by SlowJet in Pythia events with \trento\ background. The plots on the right are 1 dimensional scatter plots that explore the optimization of each parameter individually. All plots created with [python slowjet\_pTmin\_radius.py]}
 \end{center}
 \end{figure}
 
 \begin{figure}[h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{compare_xi.pdf}
-\label{fig_label}
-\caption{Fragmentation function value ($\xi$) distributions for true and reconstructed QCD and QED jets, with and without trento backgrounds.  Figure created with [python compare\_xi.py]}
+\includegraphics[width=0.9\textwidth]{xi_slowjet_truejet.pdf}
+\label{fig_xi_slowjet_truejet}
+\caption{Fragmentation function value ($\xi$) distributions for true and reconstructed QCD and QED jets, with and without trento backgrounds.  Figure created with [python xi\_slowjet\_truejet.pdf]}
 \end{center}
 \end{figure}
 
@@ -210,8 +210,8 @@ In figure 8, $\xi$ is calculated for both QCD and QED events with no \trento\ da
 \item[phenix\_data.py] PHENIX data plotted with error bars for charged multiplicity vs. number of participants, Au-Au at various energies
 \item[phenix\_trento\_comp.py] Fits \trento\ data to PHENIX data for various Au-Au energies, charged multiplicity vs. number of participants
 %
-\item[pythia\_mult\_process.py] Shows the frequency of charged multiplicities for various Pythia QCD/QED processes
-\item[pythia\_pT\_process.py] Plots frequency of various QED/QCD Pythia hard processes
+\item[pythia\_mult\_process.py] Plots frequency of charged multiplicities for various QED/QCD Pythia hard processes
+\item[pythia\_pT\_process.py] Plots frequency of $p_T$ values for various QED/QCD Pythia hard processes
 %
 \item[scanPythia.py] Rrints SlowJet information about Pythia events such as jet constituents and jet $p_T$
 \item[slowJetpT\_vs\_pTHat.py] Compares the true jet $p_T$ produced by Pythia QCD/QED events to the SlowJet jet $p_T$ 
