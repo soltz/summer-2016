@@ -267,8 +267,10 @@ def main():
 
             #   ensure data is array type
             data1 = np.array(data1)
+            data2 = np.array(data2)
 
             binned_data, binedges = np.histogram(data1,bins=quan,range=r,weights=data2)
+            binned_datasqr, binedges = np.histogram(data1,bins=quan,range=r,weights=(data2*data2))
 
             #   compile values in each bin
             weighted_bins = []
@@ -283,10 +285,15 @@ def main():
             for i in range(len(weighted_bins)):
                 if len(weighted_bins[i]) == 0:
                     binned_data[i] = binned_data[i]
+                    binned_datasqr[i] = binned_datasqr[i]
                 else:
                     binned_data[i] = binned_data[i]/(len(weighted_bins[i]))
+                    binned_datasqr[i] = binned_datasqr[i]/(len(weighted_bins[i]))
             weighted_bins = list(weighted_bins)
-                
+
+            bin_rms = np.sqrt(binned_datasqr-(binned_data*binned_data))
+            print bin_rms
+                            
             #   record bin error
             bin_err = []
             for i in range(len(weighted_bins)):
@@ -304,7 +311,8 @@ def main():
                 else:
                     weighted_bins[i] = np.mean(weighted_bins[i])
     
-            return [weighted_bins, binned_data, bin_err]
+#            return [weighted_bins, binned_data, bin_err]
+            return [weighted_bins, binned_data, bin_rms]
 
         # range for binning
         r = (pTHatMin,pTHatMax)
