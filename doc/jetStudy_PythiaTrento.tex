@@ -7,8 +7,8 @@
 \usepackage{hyperref}
 \usepackage{amsmath}
 \usepackage{pdfpages}
-\usepackage[nottoc,numbib]{tocbibind} %inserts References in table of contents
-\usepackage[sort&compress]{natbib}
+%\usepackage[nottoc,numbib]{tocbibind} %inserts References in table of contents
+%\usepackage[sort&compress]{natbib}
 %
 \textwidth 7.0in
 \textheight 9in
@@ -118,7 +118,7 @@ To use the \trento\ data as we intended we had to produce accurate Au-Au multipl
 
 Using the \trento\ multiplicity values we now knew how many background particles to create for each \trento\ event. To generate values of transverse momentum ($p_T$), pseudo-rapidity ($\eta$), and azimuthal angle ($\phi$) for each particle we used the numpy random number generator. For $\phi$  and $\eta$ we created flat distributions between -$\pi$ to $\pi$ and -2 to 2, and for $p_T$ we sampled from a Gaussian deviate, which is equivalent to a thermal Boltzmann distribution. We also included radial and elliptic flow into our background distributions by using the $\epsilon_2$ variable from the \trento\ data. First we calculated the initial transverse rapidity ($y_T$) and then applied flow as an additive boost. 
 \[y_{Boost} = \rho \times \rho_0 + \rho_2 \times \epsilon_2 \times cos(2\phi)\]
-The scaling parameter for radial flow ($\rho_0$) that we used was 0.85 from Retiere and Lisa, PRC70.044907 (2004), table 2.  The scaling parameter for elliptic flow ($\rho_2$) was 0.15 from Alver and Roland, PRC81,054905 (2010), fig 4. Again using the numpy random number generator we created a normalized radial distance ($\rho$). After applying flow, $y_T$ was converted back to $p_T$. The mass used for these calculations was chosen randomly from one of nine different particles that were included in the produced background. These particles consisted of pions, kaons, protons, and neutrons, as well as their anti particle counterparts. Figure 4 shows the background display produced from \trento\ events. Again each particle that is produced is binned in a 2 dimensional histogram in ($\eta$,$\phi$) space. For this plot the histogram bins are weighted by $p_T$. There are no jets produced within the \trento\ background.
+The scaling parameter for radial flow ($\rho_0$) that we used was 0.85, taken from Table 2 of~\cite{Retiere:2004hn}.  The scaling parameter for elliptic flow ($\rho_2$) was 0.15 from Figure 4 of~\cite{Alver:2010do}.  Using the numpy random number generator we created a normalized radial distance ($\rho$). After applying flow, $y_T$ was converted back to $p_T$. The mass used for these calculations was chosen randomly from one of nine different particles that were included in the produced background. These particles consisted of pions, kaons, protons, and neutrons, as well as their anti particle counterparts. Figure 4 shows the background display produced from \trento\ events. Again each particle that is produced is binned in a 2 dimensional histogram in ($\eta$,$\phi$) space. For this plot the histogram bins are weighted by $p_T$. There are no jets produced within the \trento\ background.
 
 \begin{figure}[h]
 \begin{center}
@@ -222,5 +222,14 @@ In figure 8, $\xi$ is calculated for both QCD and QED events with no \trento\ da
 \item[xi\_true\_jets.py] Creates a histogram of $\xi$ values for true jets
 \end{description}
 
+\begin{thebibliography}{10}
+
+\bibitem{Retiere:2004hn} 
+F. Retiere and M. Lisa, {\em Phys. Rev. C} 70, 044907 (2004).
+
+\bibitem{Alver:2010do} 
+B. Alver and G. Roland, {\em Phys. Rev. C} 81, (2010).
+
+\end{thebibliography}
 
 \end{document}
