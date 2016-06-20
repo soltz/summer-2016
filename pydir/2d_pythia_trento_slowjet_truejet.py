@@ -20,6 +20,7 @@ def usage():
     print '   -s, --seed     = pythia initial random number seed [-1]'
     print '   -c, --QCD     : turn pythia hard QCD processes off'
     print '   -q, --QED     : turn pythia hard QED processes on'
+    print '   -u, --quench     = scaling factor for momentum of non-photon jet, QED only [1.0]'
     print '   -p, --pTjetMin     = minimum slowJet pT [15]'
     print '   -r, --radius     = slowJet radius [0.7]'
     print '   -b, --bins     = number of histogram bins on each axis [20]'
@@ -29,8 +30,8 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htd:of:e:n:x:s:cqp:r:b:l', \
-              ['help','trento','trentoseed=','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','pTjetMin=','radius=','bins=','labels'])
+        opts, args = getopt.getopt(sys.argv[1:], 'htd:of:e:n:x:s:cqu:p:r:b:l', \
+              ['help','trento','trentoseed=','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','quench=','pTjetMin=','radius=','bins=','labels'])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -48,6 +49,7 @@ def main():
     seed  = -1
     QCD = 'on'
     QED = 'off'
+    quench = 1.0
 
     # slowJet settings
     pTjetMin = 15
@@ -81,6 +83,8 @@ def main():
             QCD = 'off'
         elif o in ('-q', '--QED'):
             QED = 'on'
+        elif o in ('-u', '--quench'):
+            quench = float(a)
         elif o in ('-p', '--pTjetMin'):
             pTjetMin = float(a)
         elif o in ('-r', '--radius'):
@@ -207,18 +211,60 @@ def main():
             pythia.next()
 
         #   The daughters of the initial hard process are recorded below
-            daughters5 = []
-            daughters5.extend(pythia.event[5].daughterList())
-            for j in daughters5:
-               if j != 0:
-                    daughters5.extend(pythia.event[j].daughterList())
-            daughters6 = []
-            daughters6.extend(pythia.event[6].daughterList())
-            for j in daughters6:
-               if j != 0:
-                    daughters6.extend(pythia.event[j].daughterList())
-            daughters5.extend(daughters6)
-            daughters = daughters5
+            if QCD == 'on':
+                daughters5 = []
+                daughters5.extend(pythia.event[5].daughterList())
+                for j in daughters5:
+                   if j != 0:
+                        daughters5.extend(pythia.event[j].daughterList())
+                daughters6 = []
+                daughters6.extend(pythia.event[6].daughterList())
+                for j in daughters6:
+                   if j != 0:
+                        daughters6.extend(pythia.event[j].daughterList())
+                daughters5.extend(daughters6)
+                daughters = daughters5
+                
+            if QED == 'on':
+                daughters5 = []
+                daughters5.extend(pythia.event[5].daughterList())
+                for j in daughters5:
+                   if j != 0:
+                        daughters5.extend(pythia.event[j].daughterList())
+                daughters6 = []
+                daughters6.extend(pythia.event[6].daughterList())
+                for j in daughters6:
+                   if j != 0:
+                        daughters6.extend(pythia.event[j].daughterList())
+                        
+                # Non-photon QED jets are rescaled
+                if len(daughters5) > len(daughters6):
+                    for j in daughters5:
+                        prt = pythia.event[j]
+                        px = quench*prt.px()
+                        py = quench*prt.py()
+                        pz = quench*prt.pz()
+                        prt_mass = prt.m()
+                        prt_e = (prt_mass**2 + px**2 + py**2 + pz**2)**0.5
+                        prt.px(px)
+                        prt.py(py)
+                        prt.pz(pz)
+                        prt.e(prt_e)
+                if len(daughters6) > len(daughters5):
+                    for j in daughters6:
+                        prt = pythia.event[j]
+                        px = quench*prt.px()
+                        py = quench*prt.py()
+                        pz = quench*prt.pz()
+                        prt_mass = prt.m()
+                        prt_e = (prt_mass**2 + px**2 + py**2 + pz**2)**0.5
+                        prt.px(px)
+                        prt.py(py)
+                        prt.pz(pz)
+                        prt.e(prt_e)
+
+                daughters5.extend(daughters6)
+                daughters = daughters5
 
         if trento:
             for j in range(mult[i]):
