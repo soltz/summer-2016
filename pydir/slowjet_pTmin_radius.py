@@ -69,7 +69,8 @@ pythia.init()
 
 #   Initialize SlowJet
 etaMax = 4.
-nSel = 2    
+nSel = 2
+massSet = 2   
 
 radius = 0.4
 pTjetMin = 18
@@ -150,7 +151,7 @@ for i in range(100):
 
     for pTjet in var_pTjetMin:
         for rad in var_radius:
-            slowJet = pythia8.SlowJet( -1, rad, pTjet, etaMax, nSel, 1)
+            slowJet = pythia8.SlowJet( -1, rad, pTjet, etaMax, nSel, massSet)
             slowJet.analyze(pythia.event)
             jets_found = slowJet.sizeJet()
 

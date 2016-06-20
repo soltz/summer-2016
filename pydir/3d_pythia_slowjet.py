@@ -70,8 +70,9 @@ def main():
     etaMax = 4.
     radius = 0.7
     pTjetMin = 10.
-    nSel = 2    
-    slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1);
+    nSel = 2
+    massSet = 2
+    slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
     
     while True:
 

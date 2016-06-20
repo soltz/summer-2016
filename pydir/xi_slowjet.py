@@ -150,7 +150,8 @@ def main():
     
     #   Initialize SlowJet
     etaMax = 4.
-    nSel = 2    
+    nSel = 2
+    massSet = 2 
     
     xi = []
     
@@ -227,7 +228,7 @@ def main():
                 E = (pT_wflow**2 + pz**2 + mass**2)**0.5
                 pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
             
-        slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1)
+        slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet)
         slowJet.analyze(pythia.event)
         jets_found = slowJet.sizeJet()
 

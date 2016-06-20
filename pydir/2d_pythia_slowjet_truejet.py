@@ -109,8 +109,9 @@ def main():
 
 #   Initialize SlowJet
     etaMax = 4.
-    nSel = 2    
-    slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, 1);
+    nSel = 2
+    massSet = 2
+    slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
     
     while True:
 #   Empty lists to store data for particles correctly identified as jets
