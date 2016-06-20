@@ -335,13 +335,19 @@ def main():
     y = np.arange(0,50,0.5)
     x = np.arange(0,50,0.5)
     plt.plot(x,y,'--',color='black')
+    
     if QCD == 'on':
         title = 'Hard QCD Processes'
     elif QED == 'on':
         title = 'Hard QED Processes'
-    plt.title(title)
-    plt.xlabel('pythia jet pT')
-    plt.ylabel('slowJet pT')
+    if trento:
+        title = title + ': TRENTO on'
+    else:
+        title = title + ': TRENTO off'
+    plt.title(title, fontsize = 20)
+    
+    plt.xlabel('pythia jet pT', fontsize = 15)
+    plt.ylabel('slowJet pT', fontsize = 15)
     plt.legend(loc=0)
     plt.show(block=False)
         

@@ -83,7 +83,7 @@ Figure~\ref{fig_2d_pythia_slowjet} shows two lego plots, one for a QCD event and
 % Explain how we generate pT, eta, and phi.
 % Explain we add radial flow and elliptic flow from epsilon_2 variable.
 %
-\trento\ allows users to input several physical options in order to generate initial states from which we are able to derive realistic heavy ion collision backgrounds. These options include two projectiles, number of events, reduced-thickness, fluctuation, nucleon-width, cross-section, and a normalization factor. For each data set,  we used non-deformed gold (Au) nuclei with 197 nucleons each. We produced 100,000 events for several different cross-sections. All other physical options were left to their default settings: reduced-thickness = 0, fluctuation = 1, nucleon-width = 0.5 fm, and normalization = 1. Different cross-sections correspond to different beam $E_{CM}$ per nucleon pair. The cross-sections (in units of fm$^2$) that we used to simulate the different beam energies are shown in Table~\ref{tab_phenix_trento}. \trento\ reads in the options and produces a text file listing several event properties for each event: event number, impact parameter, number of participants, initial entropy, and properties of flow. The produced \trento\ text files were then imported into our programs as an array of event data.
+\trento\ allows users to input several physical options in order to generate initial states from which we are able to derive realistic heavy ion collision backgrounds. These options include two projectiles, number of events, reduced-thickness, fluctuation, nucleon-width, cross-section, and a normalization factor. For each data set,  we used non-deformed gold (Au) nuclei with 197 nucleons each. We produced 100,000 events for several different cross-sections. All other physical options were left to their default settings: reduced-thickness = 0, fluctuation = 1, nucleon-width = 0.5 fm, and normalization = 1. Different cross-sections correspond to different beam $E_{CM}$ per nucleon pair. The cross-sections (in units of fm$^2$) that we used to simulate the different beam energies are shown in Table~\ref{tab_phenix_trento}.  An important note is that the corresponding cross-section for 14.5 GeV was shown corresponding to 15.0 GeV for the PHENIX data, however we assumed this be a typo. \trento\ reads in the options and produces a text file listing several event properties for each event: event number, impact parameter, number of participants, initial entropy, and properties of flow. The produced \trento\ text files were then imported into our programs as an array of event data.
 %
 \begin{table}[th]
 \begin{center}
@@ -105,7 +105,7 @@ $E_{CM}$(GeV) & $\sigma_{nn}$(fm$^2$) & Scaling Constant \\
 \hline
 19.6 & 3.25 & 1.95015905 \\
 \hline
-15.0 & 3.20 & 1.6460897 \\
+14.5 & 3.20 & 1.6460897 \\
 \hline
 7.7 & 3.12 & 1.27382896 \\
 \hline
@@ -173,6 +173,8 @@ All the bar plots in Figure~\ref{fig_2d_pythia_slowjet_truejet} and Figure~\ref{
 %
 To study jets and explore the different parameters of SlowJet we first focused on the SlowJet parameters of $radius$ and $p_TjetMin$. One of our programs examined how many jets were identified in Pythia events with \trento\ backgrounds. Ideally SlowJet should identify 2 jets for each Pythia event. We found that when $p_TjetMin$ was set low and $radius$ was set high, far too many jets would be identified on average. However, if $p_TjetMin$ was set high and $radius$ set low, very few jets would be identified. In the \trento\ backgrounds it is difficult to raise the requirements for clusters to be identified as jets while still being able to identify all Pythia jets. The plots produced by this program are shown in Figure~\ref{fig_slowjet_pTmin_radius}. Another program restricted the $p_T$ of Pythia jets to 20-25 GeV and set $p_TjetMin$ to 15 GeV. The $radius$ parameter was then varied to see if the identified jets would be in the correct $p_T$ range. We found similar results. Increasing $radius$ to values as high as 0.8 caused the peak of identified jets to be within the proper $p_T$ range but also allowed many jets above the range to be identified as well. Decreasing $radius$ to values as low as 0.3 caused the peak of identified jets to fall below the proper $p_T$ range but reduced the number of jets that were identified above the range.
 
+Figure~\ref{fig_slowJet_vs_pTHat} shows the effect on the SlowJet finder of adding \trento\ background to Pythia events. Both plots in Figure~\ref{fig_slowJet_vs_pTHat} use SlowJet with our default settings. In the plot on the left SlowJet is able to calculate the correct jet $p_T$ on average. However, in the plot on the right with \trento\ background included, the SlowJet $p_T$ values are higher than they should be. This occurs because SlowJet is incorrectly identifying \trento\ background particles as parts of jets.
+
 Our next focus was on the fragmentation function value ($\xi$) for particles within both SlowJet jets and true jets. $\xi$ provides information on how the energy is distributed along the jet. To calculate $\xi$ we used the following formula:
 \[\xi = ln((\vec{p_{jet}} \cdot \vec{p_{jet}})/(\vec{p_{jet}} \cdot \vec{p_{prt}}))\]
 In Figure~\ref{fig_xi_slowjet_truejet}, $\xi$ is calculated for both QCD and QED events with no \trento\ data on the left and with \trento\ data on the right. $\xi$ is calculated for SlowJet jets with $radius$ set at 0.3, 0.5, and 0.7 in all four plots. In the plots it is noticeable that as $radius$ is decreased the peak of $\xi$ values for reconstructed jets is reduced. This occurs because particles with higher $\xi$ values are farther away from the center of the jet cone. As $radius$ is decreased particles on the edge of the jet cone are no longer included in the reconstructed jets. True jets consist of all particles that are ancestors of the initial hard scattering in each Pythia event. These particles were identified by tracing the daughters of each particle starting with the two initial particles that participated in the hard process and ending when only final state particles remain.
@@ -188,8 +190,17 @@ In Figure~\ref{fig_xi_slowjet_truejet}, $\xi$ is calculated for both QCD and QED
 
 \begin{figure}[h]
 \begin{center}
+\includegraphics[width=0.49\textwidth]{slowpT_vs_pThat_pythia.pdf}
+\includegraphics[width=0.49\textwidth]{slowpT_vs_pThat_pythia_trento.pdf}
+\caption{The left plot shows SlowJet $p_T$ vs. the true $p_T$ of Pythia jets without \trento\ background. The right plot has \trento\ background included. The left plot was created with [python slowJetpT\_vs\_pTHat.py -i -u 10000]. The right plot was created with [python slowJetpT\_vs\_pTHat.py -t -i -u 10000].}
+\label{fig_slowJet_vs_pTHat}
+\end{center}
+\end{figure}
+
+\begin{figure}[h]
+\begin{center}
 \includegraphics[width=0.9\textwidth]{xi_slowjet_truejet.pdf}
-\caption{Fragmentation function value ($\xi$) distributions for true and reconstructed QCD and QED jets, with and without trento backgrounds.  Figure created with [python xi\_slowjet\_truejet.pdf]}
+\caption{Fragmentation function value ($\xi$) distributions for true and reconstructed QCD and QED jets, with and without trento backgrounds.  Figure created with [python xi\_slowjet\_truejet.py]}
 \label{fig_xi_slowjet_truejet}
 \end{center}
 \end{figure}
