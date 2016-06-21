@@ -23,6 +23,8 @@ def usage():
     print '   -u, --quench     = scaling factor for momentum of non-photon jet, QED only [1.0]'
     print '   -p, --pTjetMin     = minimum slowJet pT [15]'
     print '   -r, --radius     = slowJet radius [0.7]'
+    print '   -R, --radopt     : require slowjet to find only 2 jets by varying radius'
+    print '   -P, --pTopt     : require slowjet to find only 2 jets by varying pTjetMin'
     print '   -b, --bins     = number of histogram bins on each axis [20]'
     print '   -l, --labels     : turn plot color labels off'
 
@@ -30,8 +32,8 @@ def main():
 
 #   Parse command line and set defaults (see http://docs.python.org/library/getopt.html)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'htd:of:e:n:x:s:cqu:p:r:b:l', \
-              ['help','trento','trentoseed=','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','quench=','pTjetMin=','radius=','bins=','labels'])
+        opts, args = getopt.getopt(sys.argv[1:], 'htd:of:e:n:x:s:cqu:p:r:RPb:l', \
+              ['help','trento','trentoseed=','pythia','file=','eCM=','pTHatMin=','pTHatMax=','seed=','QCD','QED','quench=','pTjetMin=','radius=','radopt','pTopt','bins=','labels'])
     except getopt.GetoptError, err:
         print str(err) # will print something like 'option -a not recognized'
         usage()
@@ -52,8 +54,10 @@ def main():
     quench = 1.0
 
     # slowJet settings
-    pTjetMin = 15
-    radius = 0.7
+    pTjetMin_in = 15
+    radius_in = 0.7
+    pT_opt = False
+    rad_opt = False
 
     # plot settings
     bins = 20
@@ -86,9 +90,13 @@ def main():
         elif o in ('-u', '--quench'):
             quench = float(a)
         elif o in ('-p', '--pTjetMin'):
-            pTjetMin = float(a)
+            pTjetMin_in = float(a)
         elif o in ('-r', '--radius'):
-            radius = float(a)
+            radius_in = float(a)
+        elif o in ('-R', '--radopt'):
+            rad_opt = True
+        elif o in ('-P', '--pTopt'):
+            pT_opt = True
         elif o in ('-b', '--bins'):
             bins = int(a)
         elif o in ('-l', '--labels'):
@@ -171,12 +179,6 @@ def main():
     pythia.readString(set_seed)
     
     pythia.init()
-    
-    #   Initialize SlowJet
-    etaMax = 4.
-    nSel = 2
-    massSet = 2
-    slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
     
     for i in range(trento_seed,100000): 
     
@@ -336,8 +338,80 @@ def main():
                 pz = pT_wflow * math.sinh(eta_r3)
                 E = (pT_wflow**2 + pz**2 + mass**2)**0.5
                 pythia.event.append(pid, 200, 0, 0, px, py, pz, E, mass, 0., 9.)
-        
+        #   Initialize SlowJet
+        etaMax = 4.
+        nSel = 2
+        massSet = 2
+        radius = radius_in
+        pTjetMin = pTjetMin_in
+
+        slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
         slowJet.analyze(pythia.event)
+        jets_found = slowJet.sizeJet()
+
+        #   Option to raise or lower radius until only 2 jets are found
+        if rad_opt and not pT_opt:
+            while jets_found != 2 and radius > 0 and radius < 1.0:
+                slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
+                slowJet.analyze(pythia.event)
+                jets_found = slowJet.sizeJet()
+            
+                if jets_found > 10:
+                    radius = radius - 0.1
+                elif jets_found > 3:
+                    radius = radius - 0.01
+                elif jets_found > 2:
+                    radius = radius - 0.001
+                elif jets_found < 2:
+                    radius = radius + 0.01
+
+        #   Option to raise or lower pTjetMin until only 2 jets are found
+        if pT_opt and not rad_opt:
+            while jets_found != 2 and pTjetMin > 0:
+                slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
+                slowJet.analyze(pythia.event)
+                jets_found = slowJet.sizeJet()
+           
+                if jets_found > 10:
+                    pTjetMin = pTjetMin + 1.0
+                elif jets_found > 6:
+                    pTjetMin = pTjetMin + 0.1
+                elif jets_found > 2:
+                    pTjetMin = pTjetMin + 0.01
+                elif jets_found < 2:
+                    pTjetMin = pTjetMin - 0.01
+
+        #   Option to raise or lower pTjetMin until only 2 jets are found
+        #   If pTjetMin exceeds 40, option will move to radius
+        if pT_opt and rad_opt:
+            while jets_found != 2 and pTjetMin < 40.0 and pTjetMin > 0:
+                slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
+                slowJet.analyze(pythia.event)
+                jets_found = slowJet.sizeJet()
+           
+                if jets_found > 10:
+                    pTjetMin = pTjetMin + 1.0
+                elif jets_found > 6:
+                    pTjetMin = pTjetMin + 0.1
+                elif jets_found > 2:
+                    pTjetMin = pTjetMin + 0.01
+                elif jets_found < 2:
+                    pTjetMin = pTjetMin - 0.01
+                    
+            while jets_found != 2 and radius > 0 and radius < 1:
+                slowJet = pythia8.SlowJet( -1, radius, pTjetMin, etaMax, nSel, massSet);
+                slowJet.analyze(pythia.event)
+                jets_found = slowJet.sizeJet()
+            
+                if jets_found > 10:
+                    radius = radius - 0.1
+                elif jets_found > 3:
+                    radius = radius - 0.01
+                elif jets_found > 2:
+                    radius = radius - 0.001
+                elif jets_found < 2:
+                    radius = radius + 0.01
+
     
     #   Extract constituents and convert nested list for ease of manipulation
         slowJetPrtList = [[] for j in range(slowJet.sizeJet())]
