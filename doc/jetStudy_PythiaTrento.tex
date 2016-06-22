@@ -93,21 +93,21 @@ Figure~\ref{fig_2d_pythia_slowjet} shows two lego plots, one for a QCD event and
 \hline
 $E_{CM}$(GeV) & $\sigma_{nn}$(fm$^2$) & Scaling Constant \\
 \hline
-200 & 4.23 & 4.65905256 \\
+200 & 4.23 & 4.66 \\
 \hline
-130 & 3.96 & 3.96639009 \\
+130 & 3.96 & 3.97 \\
 \hline
-62.4 & 3.60 & 3.13381932 \\
+62.4 & 3.60 & 3.13 \\
 \hline
-39 & 3.43 & 2.54804101 \\
+39 & 3.43 & 2.55 \\
 \hline
-27 & 3.32 & 2.16041632 \\
+27 & 3.32 & 2.16 \\
 \hline
-19.6 & 3.25 & 1.95015905 \\
+19.6 & 3.25 & 1.95 \\
 \hline
-14.5 & 3.20 & 1.6460897 \\
+14.5 & 3.20 & 1.65 \\
 \hline
-7.7 & 3.12 & 1.27382896 \\
+7.7 & 3.12 & 1.27 \\
 \hline
 \end{tabular}
 \end{center}
@@ -143,6 +143,8 @@ The scaling parameter for radial flow ($\rho_0$) that we used was 0.85, taken fr
 % Show example of SlowJet Finder on Pythia plus Trento.
 %
 The SlowJet jet finder takes several input parameters that affect how it searches for jets. These parameters are $power$, $radius$, $p_TjetMin$, $etaMax$, $select$, and $massSet$. The $power$ parameter determines which jet finding algorithm to use. For our programs we set $power$ to -1, this corresponds to the {\it anti-k$T$} algorithm. Other possible algorithms for SlowJet are the Cambridge/Aachen algorithm and the $kT$ algorithm. The $radius$ parameter is crudely related to the radius of the jet cone in ($y$,$\phi$) space. In most of our programs $radius$ is set to 0.7 by default. The $p_TjetMin$ parameter is the minimum $p_T$ that a cluster must have to become a jet. Our values for $p_TjetMin$ are normally set to 10 or 15 GeV. The $etaMax$ parameter is the maximum +/- pseudo-rapidity that the detector is assumed to cover. For our programs $etaMax$ is always set to 2. The $select$ parameter determines which particles are analyzed by SlowJet. For our programs $select$ is always set to 2 which corresponds to all observable final-state particles. The $massSet$ parameter determines the masses assumed for the particles analyzed by SlowJet. There are three $massSet$ options: 0 for all massless, 1 for photons are massless while all others are assigned the mass of charged pions, and 2 for all given their correct masses. For our programs $massSet$ is set to 2, with an option for it to be set to 1. The $radius$ and $p_TjetMin$ parameters are most often changed while we examine jets.
+
+The {\it anti-k$T$} algorithm functions by finding the hardest particle in an event and grouping all soft particles within a certain radius into a cluster. This is then repeated for the next hard particle and so on. If two hard particles are very close they will be grouped into the same cluster. If the jet cones of two hard particles are close enough that they may overlap, the hard particle with the higher $p_T$ will have a complete cone that cuts into the cone of the other. If the $p_T$ of the two hard particles is very close then the boundary between the cones will be a straight line. In this way the {\it anti-k$T$} algorithm is resilient with respect to soft radiation but flexible with respect to hard radiation.
 
 Figure~\ref{fig_2d_pythia_slowjet_truejet} and Figure~\ref{fig_2d_pythia_trento_slowjet_truejet} demonstrate how well SlowJet is able to function in Pythia events with varying amounts of heavy ion background. Both figures use the same familiar event display that was shown in Figure~\ref{fig_2d_pythia_slowjet} and Figure~\ref{fig_2d_trento} and use the standard SlowJet settings discussed above. In these figures the color scheme is that Pythia jets that are identified correctly by SlowJet are colored green, particles mistakenly identified as SlowJet jets are colored yellow,  Pythia jets that are missed by SlowJet are colored red, and all other background particles are colored blue. Figure~\ref{fig_2d_pythia_slowjet_truejet} shows two Pythia events with no heavy ion background. In the event shown on the left SlowJet correctly identifies both jets. However, in the event on the right, the second jet is too diffuse and SlowJet does not identify it as a jet. Figure~\ref{fig_2d_pythia_trento_slowjet_truejet} is a greater test for SlowJet because now a \trento\ background is introduced. In the low \trento\ multiplicity event, SlowJet is still able to correctly identify the two jets, however a few background particles, shown in yellow, are also lumped in with the jets.  In the high \trento\ multiplicity event SlowJet becomes confused. In this case there are many \trento\ particles identified as jets, those shown in yellow. The true jets become lost in the background and SlowJet fails.
 
